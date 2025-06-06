@@ -12,6 +12,8 @@ public:
   WebGPUSampler();
   WebGPUSampler(WGPUSampler buffer);
   ~WebGPUSampler() override;
+  
+  const WGPUSampler& resource() const;
 private:
   WGPUSampler sampler_;
 };

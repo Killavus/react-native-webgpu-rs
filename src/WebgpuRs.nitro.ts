@@ -252,6 +252,25 @@ type StorageTextureLayoutObject = {
   storageTexture: StorageTextureLayoutObjectResource;
 };
 
+type BindGroupDescriptor = {
+  label?: string;
+  layout: NitroWGPUBindGroupLayout;
+  entries: BindGroupEntry[];
+};
+
+type BindGroupEntry = { binding: number; resource: BindGroupEntryResource };
+
+type BindGroupEntryResource =
+  | BindGroupBufferBinding
+  | NitroWGPUSampler
+  | NitroWGPUTextureView;
+
+type BindGroupBufferBinding = {
+  buffer: NitroWGPUBuffer;
+  offset?: number;
+  size?: number;
+};
+
 export interface NitroWGPUBuffer
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 export interface NitroWGPUQueue
@@ -270,6 +289,12 @@ export interface NitroWGPUTexture
 export interface NitroWGPUBindGroupLayout
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 
+export interface NitroWGPUBindGroup
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+
+export interface NitroWGPUTextureView
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+
 export interface NitroWGPUDevice
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   readonly queue: NitroWGPUQueue;
@@ -284,6 +309,7 @@ export interface NitroWGPUDevice
   createBindGroupLayout(
     descriptor: BindGroupLayoutDescriptor
   ): NitroWGPUBindGroupLayout;
+  createBindGroup(descriptor: BindGroupDescriptor): NitroWGPUBindGroup;
 }
 
 export interface NitroWGPUAdapter

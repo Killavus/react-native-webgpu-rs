@@ -8,4 +8,6 @@ WebGPUBindGroupLayout::~WebGPUBindGroupLayout() {
     wgpuBindGroupLayoutRelease(layout_);
   }
 }
+
+const WGPUBindGroupLayout& WebGPUBindGroupLayout::resource() const { return layout_; }
 }

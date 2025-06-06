@@ -9,4 +9,8 @@ WebGPUBuffer::~WebGPUBuffer() {
   }
 }
 
+const WGPUBuffer& WebGPUBuffer::resource() const {
+  return buffer_;
+}
+
 }

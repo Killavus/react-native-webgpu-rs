@@ -8,4 +8,9 @@ WebGPUSampler::~WebGPUSampler() {
     wgpuSamplerRelease(sampler_);
   }
 }
+
+const WGPUSampler& WebGPUSampler::resource() const {
+  return sampler_;
+}
+
 }

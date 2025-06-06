@@ -42,8 +42,12 @@ export default function App() {
         size: 1024,
         label: 'TestBuffer',
         mappedAtCreation: true,
-        usage: GPUBufferUsage.COPY_SRC | GPUBufferUsage.COPY_DST,
+        usage:
+          GPUBufferUsage.COPY_SRC |
+          GPUBufferUsage.COPY_DST |
+          GPUBufferUsage.UNIFORM,
       });
+
       const sampler = device.createSampler({
         label: 'TestSampler',
         magFilter: 'linear',
@@ -82,6 +86,12 @@ export default function App() {
         ],
       });
 
+      const bindGroup = device.createBindGroup({
+        label: 'TestBindGroup',
+        layout: bindGroupLayout,
+        entries: [{ binding: 0, resource: { buffer } }],
+      });
+
       console.log('buffer', buffer);
       console.log('queue', device.queue);
       console.log('sampler', sampler);
@@ -89,6 +99,7 @@ export default function App() {
       console.log('commandEncoder', commandEncoder);
       console.log('texture', texture);
       console.log('bindGroupLayout', bindGroupLayout);
+      console.log('bindGroup', bindGroup);
     } catch (error) {
       console.log(error);
     }

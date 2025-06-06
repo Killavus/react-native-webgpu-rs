@@ -12,6 +12,8 @@ public:
   WebGPUBindGroupLayout();
   WebGPUBindGroupLayout(WGPUBindGroupLayout layout);
   ~WebGPUBindGroupLayout() override;
+  
+  const WGPUBindGroupLayout& resource() const;
 private:
   WGPUBindGroupLayout layout_;
 };

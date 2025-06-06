@@ -8,6 +8,8 @@
 #include "HybridNitroWGPUSamplerSpec.hpp"
 #include "HybridNitroWGPUShaderModuleSpec.hpp"
 #include "HybridNitroWGPUTextureSpec.hpp"
+#include "HybridNitroWGPUBindGroupSpec.hpp"
+
 #include <memory>
 
 #include "WebGPUQueue.hpp"
@@ -23,6 +25,7 @@ using webgpurs::HybridNitroWGPUSamplerSpec;
 using webgpurs::HybridNitroWGPUShaderModuleSpec;
 using webgpurs::HybridNitroWGPUTextureSpec;
 using webgpurs::HybridNitroWGPUBindGroupLayoutSpec;
+using webgpurs::HybridNitroWGPUBindGroupSpec;
 
 class WebGPUDevice : public HybridNitroWGPUDeviceSpec {
 public:
@@ -43,7 +46,9 @@ public:
   createTexture(const TextureDescriptor &descriptor) override;
   std::shared_ptr<HybridNitroWGPUBindGroupLayoutSpec>
   createBindGroupLayout(const BindGroupLayoutDescriptor &descriptor) override;
-  
+  std::shared_ptr<HybridNitroWGPUBindGroupSpec>
+  createBindGroup(const BindGroupDescriptor &descriptor) override;
+
 private:
   WGPUDevice device_;
   std::shared_ptr<WebGPUQueue> queueInstance_;

@@ -12,6 +12,8 @@ public:
   WebGPUBuffer();
   WebGPUBuffer(WGPUBuffer buffer);
   ~WebGPUBuffer() override;
+  
+  const WGPUBuffer& resource() const;
 private:
   WGPUBuffer buffer_;
 };
