@@ -8,4 +8,8 @@ WebGPUShaderModule::~WebGPUShaderModule() {
     wgpuShaderModuleRelease(shaderModule_);
   }
 }
+
+const WGPUShaderModule& WebGPUShaderModule::resource() const {
+  return shaderModule_;
+}
 }

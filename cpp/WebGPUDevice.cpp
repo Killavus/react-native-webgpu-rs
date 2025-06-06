@@ -7,6 +7,8 @@
 #include "WebGPUTexture.hpp"
 #include "WebGPUTextureView.hpp"
 #include "WebGPUBindGroup.hpp"
+#include "WebGPUPipelineLayout.hpp"
+#include "WebGPUComputePipeline.hpp"
 
 namespace margelo::nitro {
 
@@ -652,5 +654,88 @@ WebGPUDevice::createBindGroup(const BindGroupDescriptor &descriptor) {
   WGPUBindGroup group { wgpuDeviceCreateBindGroup(device_, &wgpuDescriptor) };
   return std::make_shared<WebGPUBindGroup>(group);
 }
+
+std::shared_ptr<HybridNitroWGPUPipelineLayoutSpec> WebGPUDevice::createPipelineLayout(const PipelineLayoutDescriptor &descriptor) {
+  WGPUPipelineLayoutDescriptor wgpuDescriptor {0};
+  
+  wgpuDescriptor.label = { nullptr, WGPU_STRLEN };
+  if (descriptor.label.has_value()) {
+    wgpuDescriptor.label = { descriptor.label.value().c_str(), WGPU_STRLEN };
+  }
+  
+  wgpuDescriptor.nextInChain = nullptr;
+  
+  std::vector<WGPUBindGroupLayout> wgpuLayouts;
+  wgpuLayouts.reserve(descriptor.bindGroupLayouts.size());
+  
+  for (const auto& layout : descriptor.bindGroupLayouts) {
+    auto wgpuLayout = dynamic_cast<WebGPUBindGroupLayout*>(layout.get());
+    wgpuLayouts.push_back(wgpuLayout->resource());
+  }
+  
+  wgpuDescriptor.bindGroupLayoutCount = wgpuLayouts.size();
+  wgpuDescriptor.bindGroupLayouts = wgpuLayouts.data();
+  
+  WGPUPipelineLayout layout { wgpuDeviceCreatePipelineLayout(device_, &wgpuDescriptor) };
+  
+  return std::make_shared<WebGPUPipelineLayout>(layout);
+}
+
+std::shared_ptr<HybridNitroWGPUComputePipelineSpec>
+WebGPUDevice::createComputePipeline(const ComputePipelineDescriptor &descriptor) {
+  WGPUComputePipelineDescriptor wgpuDescriptor {0};
+  
+  wgpuDescriptor.nextInChain = nullptr;
+  wgpuDescriptor.label = { nullptr, WGPU_STRLEN };
+  if (descriptor.label.has_value()) {
+    wgpuDescriptor.label = { descriptor.label.value().c_str(), WGPU_STRLEN };
+  }
+  wgpuDescriptor.layout = dynamic_cast<WebGPUPipelineLayout*>(descriptor.layout.get())->resource();
+  wgpuDescriptor.compute.entryPoint = { nullptr, WGPU_STRLEN };
+  if (descriptor.compute.entryPoint.has_value()) {
+    wgpuDescriptor.compute.entryPoint = { descriptor.compute.entryPoint.value().c_str(), WGPU_STRLEN };
+  }
+  
+  wgpuDescriptor.compute.nextInChain = nullptr;
+  wgpuDescriptor.compute.module = dynamic_cast<WebGPUShaderModule*>(descriptor.compute.module.get())->resource();
+  
+  wgpuDescriptor.compute.constantCount = 0;
+  wgpuDescriptor.compute.constants = nullptr;
+  
+  std::vector<WGPUConstantEntry> wgpuEntries;
+  if (descriptor.compute.constants.has_value()) {
+    auto constantsMap = descriptor.compute.constants.value();
+    
+    wgpuEntries.reserve(constantsMap.size());
+    
+    for (const auto &entry : constantsMap) {
+      WGPUConstantEntry wgpuEntry {0};
+      auto key = entry.first;
+      auto value = entry.second;
+      
+      wgpuEntry.nextInChain = nullptr;
+      wgpuEntry.key = { key.c_str(), WGPU_STRLEN };
+      
+      if (std::holds_alternative<bool>(value)) {
+        auto boolValue = std::get<bool>(value);
+        wgpuEntry.value = boolValue ? 1.0 : 0.0;
+      } else {
+        auto doubleValue = std::get<double>(value);
+        wgpuEntry.value = doubleValue;
+      }
+      
+      wgpuEntries.push_back(wgpuEntry);
+    }
+    
+    wgpuDescriptor.compute.constantCount = wgpuEntries.size();
+    wgpuDescriptor.compute.constants = wgpuEntries.data();
+  }
+  
+  WGPUComputePipeline pipeline { wgpuDeviceCreateComputePipeline(device_, &wgpuDescriptor) };
+  
+  return std::make_shared<WebGPUComputePipeline>(pipeline);
+}
+
+
 
 } // namespace margelo::nitro

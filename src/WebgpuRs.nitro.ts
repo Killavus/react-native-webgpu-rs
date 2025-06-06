@@ -271,6 +271,26 @@ type BindGroupBufferBinding = {
   size?: number;
 };
 
+type PipelineLayoutDescriptor = {
+  label?: string;
+  bindGroupLayouts: NitroWGPUBindGroupLayout[];
+};
+
+type ComputePipelineComputeDescriptor = {
+  entryPoint?: string;
+  module: NitroWGPUShaderModule;
+  constants?: Record<ConstantId, ConstantValue>;
+};
+
+type ConstantId = string;
+type ConstantValue = number | boolean;
+
+type ComputePipelineDescriptor = {
+  label?: string;
+  layout: NitroWGPUPipelineLayout;
+  compute: ComputePipelineComputeDescriptor;
+};
+
 export interface NitroWGPUBuffer
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 export interface NitroWGPUQueue
@@ -295,6 +315,12 @@ export interface NitroWGPUBindGroup
 export interface NitroWGPUTextureView
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 
+export interface NitroWGPUPipelineLayout
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+
+export interface NitroWGPUComputePipeline
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+
 export interface NitroWGPUDevice
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   readonly queue: NitroWGPUQueue;
@@ -310,6 +336,12 @@ export interface NitroWGPUDevice
     descriptor: BindGroupLayoutDescriptor
   ): NitroWGPUBindGroupLayout;
   createBindGroup(descriptor: BindGroupDescriptor): NitroWGPUBindGroup;
+  createPipelineLayout(
+    descriptor: PipelineLayoutDescriptor
+  ): NitroWGPUPipelineLayout;
+  createComputePipeline(
+    descriptor: ComputePipelineDescriptor
+  ): NitroWGPUComputePipeline;
 }
 
 export interface NitroWGPUAdapter

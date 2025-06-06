@@ -12,6 +12,8 @@ public:
   WebGPUShaderModule();
   WebGPUShaderModule(WGPUShaderModule buffer);
   ~WebGPUShaderModule() override;
+  
+  const WGPUShaderModule& resource() const;
 private:
   WGPUShaderModule shaderModule_;
 };

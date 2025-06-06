@@ -9,6 +9,9 @@
 #include "HybridNitroWGPUShaderModuleSpec.hpp"
 #include "HybridNitroWGPUTextureSpec.hpp"
 #include "HybridNitroWGPUBindGroupSpec.hpp"
+#include "HybridNitroWGPUPipelineLayoutSpec.hpp"
+#include "HybridNitroWGPUComputePipelineSpec.hpp"
+
 
 #include <memory>
 
@@ -26,6 +29,7 @@ using webgpurs::HybridNitroWGPUShaderModuleSpec;
 using webgpurs::HybridNitroWGPUTextureSpec;
 using webgpurs::HybridNitroWGPUBindGroupLayoutSpec;
 using webgpurs::HybridNitroWGPUBindGroupSpec;
+using webgpurs::HybridNitroWGPUComputePipelineSpec;
 
 class WebGPUDevice : public HybridNitroWGPUDeviceSpec {
 public:
@@ -48,6 +52,10 @@ public:
   createBindGroupLayout(const BindGroupLayoutDescriptor &descriptor) override;
   std::shared_ptr<HybridNitroWGPUBindGroupSpec>
   createBindGroup(const BindGroupDescriptor &descriptor) override;
+  std::shared_ptr<HybridNitroWGPUPipelineLayoutSpec>
+  createPipelineLayout(const PipelineLayoutDescriptor &descriptor) override;
+  std::shared_ptr<HybridNitroWGPUComputePipelineSpec>
+  createComputePipeline(const ComputePipelineDescriptor &descriptor) override;
 
 private:
   WGPUDevice device_;
