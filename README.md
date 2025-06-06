@@ -2,23 +2,28 @@
 
 React Native WebGPU implementation (with gfx-rs/wgpu)
 
+## Pre-release warning
+
+Right now due to lack of XCFramework setup library works only on iOS simulator. This should be solved soon since there is a clear path to make it work.
+
+## Building 
+
+Download latest `wgpu-native` release from [`wgpu-native` releases page](https://github.com/gfx-rs/wgpu-native/releases). Choose `wgpu-ios-aarch64-simulator-release` build and unzip it into `wgpu-native/` directory of this repository.
+
+
 ## Installation
 
-```sh
-npm install react-native-webgpu-rs react-native-nitro-modules
-
-> `react-native-nitro-modules` is required as this library relies on [Nitro Modules](https://nitro.margelo.com/).
-```
+Package is not published yet.
 
 ## Usage
 
 
 ```js
-import { multiply } from 'react-native-webgpu-rs';
+import { Instance } from 'react-native-webgpu-rs';
 
-// ...
+const adapter = await Instance.requestAdapter();
 
-const result = multiply(3, 7);
+// The rest follows WebGPU spec.
 ```
 
 
