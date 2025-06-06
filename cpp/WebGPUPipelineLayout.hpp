@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUPipelineLayoutSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -12,8 +12,9 @@ public:
   WebGPUPipelineLayout();
   WebGPUPipelineLayout(WGPUPipelineLayout layout_);
   ~WebGPUPipelineLayout() override;
-  
-  const WGPUPipelineLayout& resource() const;
+
+  const WGPUPipelineLayout &resource() const;
+
 private:
   WGPUPipelineLayout layout_;
 };

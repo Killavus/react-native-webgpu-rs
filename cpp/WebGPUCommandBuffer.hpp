@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUCommandBufferSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -13,8 +13,9 @@ public:
   WebGPUCommandBuffer();
   WebGPUCommandBuffer(WGPUCommandBuffer cmdBuffer);
   ~WebGPUCommandBuffer() override;
-  
-  const WGPUCommandBuffer& resource() const;
+
+  const WGPUCommandBuffer &resource() const;
+
 private:
   WGPUCommandBuffer cmdBuffer_;
 };

@@ -2,12 +2,13 @@
 
 namespace margelo::nitro {
 WebGPUBindGroup::WebGPUBindGroup() : HybridObject(TAG), group_(nullptr) {}
-WebGPUBindGroup::WebGPUBindGroup(WGPUBindGroup group) : HybridObject(TAG), group_(group) {}
+WebGPUBindGroup::WebGPUBindGroup(WGPUBindGroup group)
+    : HybridObject(TAG), group_(group) {}
 WebGPUBindGroup::~WebGPUBindGroup() {
   if (group_) {
     wgpuBindGroupRelease(group_);
   }
 }
 
-const WGPUBindGroup& WebGPUBindGroup::resource() const { return group_; }
-}
+const WGPUBindGroup &WebGPUBindGroup::resource() const { return group_; }
+} // namespace margelo::nitro

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUAdapterSpec.hpp"
 #include "HybridNitroWGPUDeviceSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -15,10 +15,13 @@ public:
   WebGPUAdapter();
   WebGPUAdapter(WGPUAdapter adapter);
   ~WebGPUAdapter() override;
-  
-  std::shared_ptr<Promise<std::shared_ptr<margelo::nitro::webgpurs::HybridNitroWGPUDeviceSpec>>> requestDevice() override;
+
+  std::shared_ptr<Promise<
+      std::shared_ptr<margelo::nitro::webgpurs::HybridNitroWGPUDeviceSpec>>>
+  requestDevice() override;
+
 private:
   WGPUAdapter adapter_;
 };
 
-} // namespace margelo::nitro 
+} // namespace margelo::nitro

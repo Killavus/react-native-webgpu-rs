@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUTextureViewSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -12,8 +12,9 @@ public:
   WebGPUTextureView();
   WebGPUTextureView(WGPUTextureView textureView);
   ~WebGPUTextureView() override;
-  
-  const WGPUTextureView& resource() const;
+
+  const WGPUTextureView &resource() const;
+
 private:
   WGPUTextureView textureView_;
 };

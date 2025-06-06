@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUBindGroupSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -12,8 +12,9 @@ public:
   WebGPUBindGroup();
   WebGPUBindGroup(WGPUBindGroup group);
   ~WebGPUBindGroup() override;
-  
-  const WGPUBindGroup& resource() const;
+
+  const WGPUBindGroup &resource() const;
+
 private:
   WGPUBindGroup group_;
 };

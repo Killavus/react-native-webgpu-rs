@@ -1,17 +1,16 @@
 #pragma once
 
 #include "HybridNitroWGPUBindGroupLayoutSpec.hpp"
+#include "HybridNitroWGPUBindGroupSpec.hpp"
 #include "HybridNitroWGPUBufferSpec.hpp"
 #include "HybridNitroWGPUCommandEncoderSpec.hpp"
+#include "HybridNitroWGPUComputePipelineSpec.hpp"
 #include "HybridNitroWGPUDeviceSpec.hpp"
+#include "HybridNitroWGPUPipelineLayoutSpec.hpp"
 #include "HybridNitroWGPUQueueSpec.hpp"
 #include "HybridNitroWGPUSamplerSpec.hpp"
 #include "HybridNitroWGPUShaderModuleSpec.hpp"
 #include "HybridNitroWGPUTextureSpec.hpp"
-#include "HybridNitroWGPUBindGroupSpec.hpp"
-#include "HybridNitroWGPUPipelineLayoutSpec.hpp"
-#include "HybridNitroWGPUComputePipelineSpec.hpp"
-
 
 #include <memory>
 
@@ -20,16 +19,16 @@
 
 namespace margelo::nitro {
 
+using webgpurs::HybridNitroWGPUBindGroupLayoutSpec;
+using webgpurs::HybridNitroWGPUBindGroupSpec;
 using webgpurs::HybridNitroWGPUBufferSpec;
 using webgpurs::HybridNitroWGPUCommandEncoderSpec;
+using webgpurs::HybridNitroWGPUComputePipelineSpec;
 using webgpurs::HybridNitroWGPUDeviceSpec;
 using webgpurs::HybridNitroWGPUQueueSpec;
 using webgpurs::HybridNitroWGPUSamplerSpec;
 using webgpurs::HybridNitroWGPUShaderModuleSpec;
 using webgpurs::HybridNitroWGPUTextureSpec;
-using webgpurs::HybridNitroWGPUBindGroupLayoutSpec;
-using webgpurs::HybridNitroWGPUBindGroupSpec;
-using webgpurs::HybridNitroWGPUComputePipelineSpec;
 
 class WebGPUDevice : public HybridNitroWGPUDeviceSpec {
 public:

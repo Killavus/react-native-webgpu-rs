@@ -1,60 +1,73 @@
 #include "WebGPUCommandEncoder.hpp"
-#include "WebGPUComputePassEncoder.hpp"
-#include "WebGPUCommandBuffer.hpp"
 #include "WebGPUBuffer.hpp"
+#include "WebGPUCommandBuffer.hpp"
+#include "WebGPUComputePassEncoder.hpp"
 
 namespace margelo::nitro {
-WebGPUCommandEncoder::WebGPUCommandEncoder() : HybridObject(TAG), commandEncoder_(nullptr) {}
-WebGPUCommandEncoder::WebGPUCommandEncoder(WGPUCommandEncoder commandEncoder) : HybridObject(TAG), commandEncoder_(commandEncoder) {}
+WebGPUCommandEncoder::WebGPUCommandEncoder()
+    : HybridObject(TAG), commandEncoder_(nullptr) {}
+WebGPUCommandEncoder::WebGPUCommandEncoder(WGPUCommandEncoder commandEncoder)
+    : HybridObject(TAG), commandEncoder_(commandEncoder) {}
 WebGPUCommandEncoder::~WebGPUCommandEncoder() {
   if (commandEncoder_) {
     wgpuCommandEncoderRelease(commandEncoder_);
   }
 }
 
-std::shared_ptr<HybridNitroWGPUComputePassEncoderSpec> WebGPUCommandEncoder::beginComputePass(const ComputePassDescriptor& descriptor) {
-  WGPUComputePassDescriptor wgpuDescriptor {0};
-  
+std::shared_ptr<HybridNitroWGPUComputePassEncoderSpec>
+WebGPUCommandEncoder::beginComputePass(
+    const ComputePassDescriptor &descriptor) {
+  WGPUComputePassDescriptor wgpuDescriptor{0};
+
   wgpuDescriptor.nextInChain = nullptr;
   // TODO: Support timestamp writes.
   wgpuDescriptor.timestampWrites = nullptr;
-  wgpuDescriptor.label = { nullptr, WGPU_STRLEN };
+  wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
   if (descriptor.label.has_value()) {
-    wgpuDescriptor.label = { descriptor.label.value().c_str(), WGPU_STRLEN };
+    wgpuDescriptor.label = {descriptor.label.value().c_str(), WGPU_STRLEN};
   }
-  
-  WGPUComputePassEncoder encoder { wgpuCommandEncoderBeginComputePass(commandEncoder_, &wgpuDescriptor) };
-  
+
+  WGPUComputePassEncoder encoder{
+      wgpuCommandEncoderBeginComputePass(commandEncoder_, &wgpuDescriptor)};
+
   return std::make_shared<WebGPUComputePassEncoder>(encoder);
 };
 
-std::shared_ptr<HybridNitroWGPUCommandBufferSpec> WebGPUCommandEncoder::finish(const std::optional<CommandBufferDescriptor>& descriptor) {
+std::shared_ptr<HybridNitroWGPUCommandBufferSpec> WebGPUCommandEncoder::finish(
+    const std::optional<CommandBufferDescriptor> &descriptor) {
   if (descriptor.has_value()) {
-    WGPUCommandBufferDescriptor wgpuDescriptor {0};
+    WGPUCommandBufferDescriptor wgpuDescriptor{0};
     wgpuDescriptor.nextInChain = nullptr;
-    wgpuDescriptor.label = { nullptr, WGPU_STRLEN };
-    
+    wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
+
     if (descriptor.value().label.has_value()) {
-      wgpuDescriptor.label = { descriptor.value().label.value().c_str(), WGPU_STRLEN };
+      wgpuDescriptor.label = {descriptor.value().label.value().c_str(),
+                              WGPU_STRLEN};
     }
-    
-    WGPUCommandBuffer cmdBuffer {
-      wgpuCommandEncoderFinish(commandEncoder_, &wgpuDescriptor)
-    };
-    
+
+    WGPUCommandBuffer cmdBuffer{
+        wgpuCommandEncoderFinish(commandEncoder_, &wgpuDescriptor)};
+
     return std::make_shared<WebGPUCommandBuffer>(cmdBuffer);
   } else {
-    WGPUCommandBuffer cmdBuffer { wgpuCommandEncoderFinish(commandEncoder_, nullptr) };
+    WGPUCommandBuffer cmdBuffer{
+        wgpuCommandEncoderFinish(commandEncoder_, nullptr)};
     return std::make_shared<WebGPUCommandBuffer>(cmdBuffer);
   }
-  
 };
 
-void WebGPUCommandEncoder::copyBufferToBuffer(const std::shared_ptr<HybridNitroWGPUBufferSpec>& source, double sourceOffset, const std::shared_ptr<HybridNitroWGPUBufferSpec>& destination, double destinationOffset, double size) {
-  auto wgpuSource = dynamic_cast<WebGPUBuffer*>(source.get())->resource();
-  auto wgpuDestination = dynamic_cast<WebGPUBuffer*>(destination.get())->resource();
-  
-  wgpuCommandEncoderCopyBufferToBuffer(commandEncoder_, wgpuSource, (uint64_t) sourceOffset, wgpuDestination, (uint64_t) destinationOffset, (uint64_t) size);
+void WebGPUCommandEncoder::copyBufferToBuffer(
+    const std::shared_ptr<HybridNitroWGPUBufferSpec> &source,
+    double sourceOffset,
+    const std::shared_ptr<HybridNitroWGPUBufferSpec> &destination,
+    double destinationOffset, double size) {
+  auto wgpuSource = dynamic_cast<WebGPUBuffer *>(source.get())->resource();
+  auto wgpuDestination =
+      dynamic_cast<WebGPUBuffer *>(destination.get())->resource();
+
+  wgpuCommandEncoderCopyBufferToBuffer(
+      commandEncoder_, wgpuSource, (uint64_t)sourceOffset, wgpuDestination,
+      (uint64_t)destinationOffset, (uint64_t)size);
 }
 
-}
+} // namespace margelo::nitro

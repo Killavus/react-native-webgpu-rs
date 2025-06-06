@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUShaderModuleSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -12,8 +12,9 @@ public:
   WebGPUShaderModule();
   WebGPUShaderModule(WGPUShaderModule buffer);
   ~WebGPUShaderModule() override;
-  
-  const WGPUShaderModule& resource() const;
+
+  const WGPUShaderModule &resource() const;
+
 private:
   WGPUShaderModule shaderModule_;
 };

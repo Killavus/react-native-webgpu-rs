@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUComputePipelineSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -12,8 +12,9 @@ public:
   WebGPUComputePipeline();
   WebGPUComputePipeline(WGPUComputePipeline pipeline_);
   ~WebGPUComputePipeline() override;
-  
-  const WGPUComputePipeline& resource() const;
+
+  const WGPUComputePipeline &resource() const;
+
 private:
   WGPUComputePipeline pipeline_;
 };

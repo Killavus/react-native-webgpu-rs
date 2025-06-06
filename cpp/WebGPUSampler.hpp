@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
 #include "HybridNitroWGPUSamplerSpec.hpp"
+#include <memory>
 #include <webgpu/wgpu.h>
 
 namespace margelo::nitro {
@@ -12,8 +12,9 @@ public:
   WebGPUSampler();
   WebGPUSampler(WGPUSampler buffer);
   ~WebGPUSampler() override;
-  
-  const WGPUSampler& resource() const;
+
+  const WGPUSampler &resource() const;
+
 private:
   WGPUSampler sampler_;
 };
