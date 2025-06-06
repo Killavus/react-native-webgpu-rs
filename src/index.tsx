@@ -25,4 +25,10 @@ export const GPUTextureUsage = {
   TEXTURE_BINDING: 0x04,
 };
 
+export const GPUShaderStage = {
+  VERTEX: 0x01,
+  FRAGMENT: 0x02,
+  COMPUTE: 0x04,
+};
+
 export { Instance };

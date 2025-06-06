@@ -164,6 +164,94 @@ type TextureDescriptor = {
   viewFormats?: TextureFormat[];
 };
 
+type BindGroupLayoutDescriptor = {
+  label?: string;
+  entries: BindGroupLayoutEntry[];
+};
+
+type BindGroupLayoutEntry =
+  | BufferLayoutObject
+  | TextureLayoutObject
+  | SamplerLayoutObject
+  | StorageTextureLayoutObject
+  | TextureLayoutObject;
+
+type BufferLayoutObjectBindingType =
+  | 'uniform'
+  | 'storage'
+  | 'read-only-storage';
+
+type TextureLayoutObjectSampleType =
+  | 'float'
+  | 'unfilterable-float'
+  | 'depth'
+  | 'sint'
+  | 'uint';
+
+type TextureLayoutObjectViewDimension =
+  | '1d'
+  | '2d'
+  | '2d-array'
+  | 'cube'
+  | 'cube-array'
+  | '3d';
+
+type SamplerLayoutObjectBindingType =
+  | 'filtering'
+  | 'non-filtering'
+  | 'comparison';
+
+type StorageTextureLayoutObjectAccess =
+  | 'write-only'
+  | 'read-write'
+  | 'read-only';
+
+type BufferLayoutObjectResource = {
+  hasDynamicOffset?: boolean;
+  minBindingSize?: number;
+  type?: BufferLayoutObjectBindingType;
+};
+
+type TextureLayoutObjectResource = {
+  sampleType?: TextureLayoutObjectSampleType;
+  multisampled?: boolean;
+  viewDimension?: TextureLayoutObjectViewDimension;
+};
+
+type SamplerLayoutObjectResource = {
+  type?: SamplerLayoutObjectBindingType;
+};
+
+type StorageTextureLayoutObjectResource = {
+  access?: StorageTextureLayoutObjectAccess;
+  format: TextureFormat;
+  viewDimension?: TextureLayoutObjectViewDimension;
+};
+
+type BufferLayoutObject = {
+  binding: number;
+  visibility: number;
+  buffer: BufferLayoutObjectResource;
+};
+
+type TextureLayoutObject = {
+  binding: number;
+  visibility: number;
+  texture: TextureLayoutObjectResource;
+};
+
+type SamplerLayoutObject = {
+  binding: number;
+  visibility: number;
+  sampler: SamplerLayoutObjectResource;
+};
+
+type StorageTextureLayoutObject = {
+  binding: number;
+  visibility: number;
+  storageTexture: StorageTextureLayoutObjectResource;
+};
+
 export interface NitroWGPUBuffer
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 export interface NitroWGPUQueue
@@ -179,6 +267,9 @@ export interface NitroWGPUCommandEncoder
 export interface NitroWGPUTexture
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 
+export interface NitroWGPUBindGroupLayout
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+
 export interface NitroWGPUDevice
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   readonly queue: NitroWGPUQueue;
@@ -190,6 +281,9 @@ export interface NitroWGPUDevice
     descriptor: CommandEncoderDescriptor
   ): NitroWGPUCommandEncoder;
   createTexture(descriptor: TextureDescriptor): NitroWGPUTexture;
+  createBindGroupLayout(
+    descriptor: BindGroupLayoutDescriptor
+  ): NitroWGPUBindGroupLayout;
 }
 
 export interface NitroWGPUAdapter

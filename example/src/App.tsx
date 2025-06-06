@@ -3,6 +3,7 @@ import {
   Instance,
   GPUBufferUsage,
   GPUTextureUsage,
+  GPUShaderStage,
 } from 'react-native-webgpu-rs';
 
 const SHADER_CODE = `
@@ -68,12 +69,26 @@ export default function App() {
           GPUTextureUsage.RENDER_ATTACHMENT,
       });
 
+      const bindGroupLayout = device.createBindGroupLayout({
+        label: 'TestBindGroupLayout',
+        entries: [
+          {
+            binding: 0,
+            visibility: GPUShaderStage.VERTEX,
+            buffer: {
+              type: 'uniform',
+            },
+          },
+        ],
+      });
+
       console.log('buffer', buffer);
       console.log('queue', device.queue);
       console.log('sampler', sampler);
       console.log('shaderModule', shaderModule);
       console.log('commandEncoder', commandEncoder);
       console.log('texture', texture);
+      console.log('bindGroupLayout', bindGroupLayout);
     } catch (error) {
       console.log(error);
     }

@@ -1,4 +1,5 @@
 #include "WebGPUDevice.hpp"
+#include "WebGPUBindGroupLayout.hpp"
 #include "WebGPUBuffer.hpp"
 #include "WebGPUCommandEncoder.hpp"
 #include "WebGPUSampler.hpp"
@@ -267,6 +268,86 @@ toWGPUMipmapFilterMode(const SamplerFilterType &filterType) {
   }
 }
 
+static WGPUSamplerBindingType
+toWGPUSamplerBindingType(const SamplerLayoutObjectBindingType &bindingType) {
+  switch (bindingType) {
+  case SamplerLayoutObjectBindingType::FILTERING:
+    return WGPUSamplerBindingType_Filtering;
+  case SamplerLayoutObjectBindingType::NON_FILTERING:
+    return WGPUSamplerBindingType_NonFiltering;
+  case SamplerLayoutObjectBindingType::COMPARISON:
+    return WGPUSamplerBindingType_Comparison;
+  default:
+    return WGPUSamplerBindingType_Undefined;
+  }
+}
+
+static WGPUTextureViewDimension toWGPUTextureViewDimension(
+    const TextureLayoutObjectViewDimension &viewDimension) {
+  switch (viewDimension) {
+  case TextureLayoutObjectViewDimension::_1D:
+    return WGPUTextureViewDimension_1D;
+  case TextureLayoutObjectViewDimension::_2D:
+    return WGPUTextureViewDimension_2D;
+  case TextureLayoutObjectViewDimension::_2D_ARRAY:
+    return WGPUTextureViewDimension_2DArray;
+  case TextureLayoutObjectViewDimension::_3D:
+    return WGPUTextureViewDimension_3D;
+  case TextureLayoutObjectViewDimension::CUBE:
+    return WGPUTextureViewDimension_Cube;
+  case TextureLayoutObjectViewDimension::CUBE_ARRAY:
+    return WGPUTextureViewDimension_CubeArray;
+  default:
+    return WGPUTextureViewDimension_Undefined;
+  }
+}
+
+static WGPUTextureSampleType
+toWGPUTextureSampleType(const TextureLayoutObjectSampleType &sampleType) {
+  switch (sampleType) {
+  case TextureLayoutObjectSampleType::FLOAT:
+    return WGPUTextureSampleType_Float;
+  case TextureLayoutObjectSampleType::UNFILTERABLE_FLOAT:
+    return WGPUTextureSampleType_UnfilterableFloat;
+  case TextureLayoutObjectSampleType::DEPTH:
+    return WGPUTextureSampleType_Depth;
+  case TextureLayoutObjectSampleType::SINT:
+    return WGPUTextureSampleType_Sint;
+  case TextureLayoutObjectSampleType::UINT:
+    return WGPUTextureSampleType_Uint;
+  default:
+    return WGPUTextureSampleType_Undefined;
+  }
+}
+
+static WGPUBufferBindingType
+toWGPUBufferBindingType(const BufferLayoutObjectBindingType &bindingType) {
+  switch (bindingType) {
+  case BufferLayoutObjectBindingType::UNIFORM:
+    return WGPUBufferBindingType_Uniform;
+  case BufferLayoutObjectBindingType::READ_ONLY_STORAGE:
+    return WGPUBufferBindingType_ReadOnlyStorage;
+  case BufferLayoutObjectBindingType::STORAGE:
+    return WGPUBufferBindingType_Storage;
+  default:
+    return WGPUBufferBindingType_Undefined;
+  }
+}
+
+static WGPUStorageTextureAccess
+toWGPUStorageTextureAccess(const StorageTextureLayoutObjectAccess &access) {
+  switch (access) {
+  case StorageTextureLayoutObjectAccess::READ_ONLY:
+    return WGPUStorageTextureAccess_ReadOnly;
+  case StorageTextureLayoutObjectAccess::READ_WRITE:
+    return WGPUStorageTextureAccess_ReadWrite;
+  case StorageTextureLayoutObjectAccess::WRITE_ONLY:
+    return WGPUStorageTextureAccess_WriteOnly;
+  default:
+    return WGPUStorageTextureAccess_Undefined;
+  }
+}
+
 WebGPUDevice::WebGPUDevice()
     : HybridObject(TAG), device_(nullptr), queueInstance_(nullptr) {}
 
@@ -440,6 +521,88 @@ WebGPUDevice::createTexture(const TextureDescriptor &descriptor) {
 
   WGPUTexture texture{wgpuDeviceCreateTexture(device_, &wgpuDescriptor)};
   return std::make_shared<WebGPUTexture>(texture);
+}
+
+std::shared_ptr<HybridNitroWGPUBindGroupLayoutSpec>
+WebGPUDevice::createBindGroupLayout(
+    const BindGroupLayoutDescriptor &descriptor) {
+  WGPUBindGroupLayoutDescriptor wgpuDescriptor{0};
+
+  wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
+  if (descriptor.label.has_value()) {
+    wgpuDescriptor.label = {descriptor.label.value().c_str(), WGPU_STRLEN};
+  }
+
+  std::vector<WGPUBindGroupLayoutEntry> wgpuEntries;
+  wgpuEntries.reserve(descriptor.entries.size());
+
+  for (auto entry : descriptor.entries) {
+    WGPUBindGroupLayoutEntry wgpuEntry{0};
+
+    if (std::holds_alternative<SamplerLayoutObject>(entry)) {
+      auto samplerEntry = std::get<SamplerLayoutObject>(entry);
+
+      wgpuEntry.visibility = (uint64_t)samplerEntry.visibility;
+      wgpuEntry.nextInChain = nullptr;
+      wgpuEntry.binding = (uint32_t)samplerEntry.binding;
+      wgpuEntry.sampler = {
+          .type = toWGPUSamplerBindingType(samplerEntry.sampler.type.value_or(
+              SamplerLayoutObjectBindingType::FILTERING)),
+          .nextInChain = nullptr};
+    } else if (std::holds_alternative<TextureLayoutObject>(entry)) {
+      auto textureEntry = std::get<TextureLayoutObject>(entry);
+      wgpuEntry.visibility = (uint64_t)textureEntry.visibility;
+      wgpuEntry.nextInChain = nullptr;
+      wgpuEntry.binding = (uint32_t)textureEntry.binding;
+      wgpuEntry.texture = {
+          .sampleType =
+              toWGPUTextureSampleType(textureEntry.texture.sampleType.value_or(
+                  TextureLayoutObjectSampleType::FLOAT)),
+          .viewDimension = toWGPUTextureViewDimension(
+              textureEntry.texture.viewDimension.value_or(
+                  TextureLayoutObjectViewDimension::_2D)),
+          .multisampled = textureEntry.texture.multisampled.value_or(0),
+          .nextInChain = nullptr};
+    } else if (std::holds_alternative<BufferLayoutObject>(entry)) {
+      auto bufferEntry = std::get<BufferLayoutObject>(entry);
+      wgpuEntry.visibility = (uint64_t)bufferEntry.visibility;
+      wgpuEntry.nextInChain = nullptr;
+      wgpuEntry.binding = (uint32_t)bufferEntry.binding;
+      wgpuEntry.buffer = {
+          .nextInChain = nullptr,
+          .minBindingSize =
+              (uint32_t)bufferEntry.buffer.minBindingSize.value_or(0),
+          .hasDynamicOffset = bufferEntry.buffer.hasDynamicOffset.value_or(0),
+          .type = toWGPUBufferBindingType(bufferEntry.buffer.type.value_or(
+              BufferLayoutObjectBindingType::UNIFORM))};
+    } else if (std::holds_alternative<StorageTextureLayoutObject>(entry)) {
+      auto textureEntry = std::get<StorageTextureLayoutObject>(entry);
+      wgpuEntry.visibility = (uint64_t)textureEntry.visibility;
+      wgpuEntry.nextInChain = nullptr;
+      wgpuEntry.binding = (uint32_t)textureEntry.binding;
+      wgpuEntry.storageTexture = {
+          .format = toWGPUTextureFormat(textureEntry.storageTexture.format),
+          .access = toWGPUStorageTextureAccess(
+              textureEntry.storageTexture.access.value_or(
+                  StorageTextureLayoutObjectAccess::WRITE_ONLY)),
+          .viewDimension = toWGPUTextureViewDimension(
+              textureEntry.storageTexture.viewDimension.value_or(
+                  TextureLayoutObjectViewDimension::_2D)),
+          .nextInChain = nullptr};
+    } else {
+      continue;
+    }
+
+    wgpuEntries.push_back(wgpuEntry);
+  }
+
+  wgpuDescriptor.entryCount = wgpuEntries.size();
+  wgpuDescriptor.entries = wgpuEntries.data();
+
+  WGPUBindGroupLayout layout{
+      wgpuDeviceCreateBindGroupLayout(device_, &wgpuDescriptor)};
+
+  return std::make_shared<WebGPUBindGroupLayout>(layout);
 }
 
 } // namespace margelo::nitro
