@@ -8,9 +8,14 @@
     "androidCxxLibName": "webgpurs"
   },
   "autolinking": {
-    "WebgpuRs": {
-      "swift": "WebgpuRs",
-      "kotlin": "WebgpuRs"
+    "NitroWGPUAdapter": {
+      "cpp": "WebGPUAdapter"
+    },
+    "NitroWGPUInstance": {
+      "cpp": "WebGPUInstance"
+    },
+    "NitroWGPUDevice": {
+      "cpp": "WebGPUDevice"
     }
   },
   "ignorePaths": ["node_modules"]
