@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["webgpurs"],
+  "ios": {
+    "iosModuleName": "WebgpuRs"
+  },
+  "android": {
+    "androidNamespace": ["webgpurs"],
+    "androidCxxLibName": "webgpurs"
+  },
+  "autolinking": {
+    "WebgpuRs": {
+      "swift": "WebgpuRs",
+      "kotlin": "WebgpuRs"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
