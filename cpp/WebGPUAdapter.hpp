@@ -2,6 +2,8 @@
 
 #include "HybridNitroWGPUAdapterSpec.hpp"
 #include "HybridNitroWGPUDeviceSpec.hpp"
+#include "WebGPUInstance.hpp"
+
 #include <memory>
 #include <webgpu/wgpu.h>
 
@@ -13,15 +15,22 @@ using webgpurs::HybridNitroWGPUDeviceSpec;
 class WebGPUAdapter : public HybridNitroWGPUAdapterSpec {
 public:
   WebGPUAdapter();
-  WebGPUAdapter(WGPUAdapter adapter);
+  WebGPUAdapter(WGPUAdapter adapter,
+                const std::shared_ptr<WebGPUInstance> &instance);
   ~WebGPUAdapter() override;
 
-  std::shared_ptr<Promise<
-      std::shared_ptr<margelo::nitro::webgpurs::HybridNitroWGPUDeviceSpec>>>
-  requestDevice() override;
+  std::shared_ptr<Promise<std::shared_ptr<HybridNitroWGPUDeviceSpec>>>
+  requestDevice(const std::optional<DeviceDescriptor> &descriptor) override;
 
+  RequiredLimits getLimits() override;
+  std::vector<DeviceFeature> getFeatures() override;
+  bool getIsFallbackAdapter() override;
+  DeviceInfo getInfo() override;
+
+protected:
 private:
   WGPUAdapter adapter_;
+  std::shared_ptr<WebGPUInstance> instance_;
 };
 
 } // namespace margelo::nitro

@@ -340,8 +340,33 @@ export interface NitroWGPUCommandEncoder
   finish(descriptor?: CommandBufferDescriptor): NitroWGPUCommandBuffer;
 }
 
+type TextureViewAspect = 'all' | 'stencil-only' | 'depth-only';
+
+type TextureViewDescriptor = {
+  label?: string;
+  aspect?: TextureViewAspect;
+  arrayLayerCount?: number;
+  baseArrayLayer?: number;
+  baseMipLevel?: number;
+  dimension?: TextureLayoutObjectViewDimension;
+  format?: TextureFormat;
+  mipLevelCount?: number;
+  usage?: number;
+};
+
 export interface NitroWGPUTexture
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  createView(descriptor: TextureViewDescriptor): NitroWGPUTextureView;
+
+  readonly width: number;
+  readonly height: number;
+  readonly depthOrArrayLayers: number;
+  readonly mipLevelCount: number;
+  readonly sampleCount: number;
+  readonly dimension: TextureDimension;
+  readonly format: TextureFormat;
+  readonly usage: number;
+}
 
 export interface NitroWGPUBindGroupLayout
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
@@ -376,9 +401,120 @@ export interface NitroWGPUComputePassEncoder
   end(): void;
 }
 
+type DeviceFeature =
+  // WebGPU Features:
+  | 'bgra8unorm-storage'
+  | 'clip-distances'
+  | 'depth-clip-control'
+  | 'depth32float-stencil8'
+  | 'dual-source-blending'
+  | 'float32-blendable'
+  | 'float32-filterable'
+  | 'indirect-first-instance'
+  | 'rg11b10ufloat-renderable'
+  | 'shader-f16'
+  | 'subgroups'
+  | 'texture-compression-bc'
+  | 'texture-compression-bc-sliced-3d'
+  | 'texture-compression-astc'
+  | 'texture-compression-astc-sliced-3d'
+  | 'texture-compression-etc2'
+  | 'timestamp-query'
+  // Native Extensions:
+  /*
+  Requires wgpu.h api change:
+  "ext:address-mode-clamp-to-zero" |
+  "ext:address-mode-clamp-to-border" |
+  "ext:polygon-mode-line" |
+  "ext:polygon-mode-point" |
+  "ext:conservative-rasterization" |
+  "ext:clear-texture" |
+  "ext:multiview" |
+  */
+  | 'ext:push-constants'
+  | 'ext:texture-adapter-specific-format-features'
+  | 'ext:multi-draw-indirect'
+  | 'ext:multi-draw-indirect-count'
+  | 'ext:vertex-writable-storage'
+  | 'ext:texture-binding-array'
+  | 'ext:sampled-texture-and-storage-buffer-array-non-uniform-indexing'
+  | 'ext:pipeline-statistics-query'
+  | 'ext:storage-resource-binding-array'
+  | 'ext:partially-bound-binding-array'
+  | 'ext:texture-format-16bit-norm'
+  | 'ext:texture-compression-astc-hdr'
+  | 'ext:mappable-primary-buffers'
+  | 'ext:buffer-binding-array'
+  | 'ext:uniform-buffer-and-storage-texture-non-uniform-indexing'
+  | 'ext:spirv-shader-passthrough'
+  | 'ext:vertex-attribute-64bit'
+  | 'ext:texture-format-nv12'
+  | 'ext:ray-tracing-acceleration-structure'
+  | 'ext:ray-query'
+  | 'ext:shader-f64'
+  | 'ext:shader-i16'
+  | 'ext:shader-primitive-index'
+  | 'ext:shader-early-depth-test'
+  | 'ext:subgroup-vertex'
+  | 'ext:subgroup-barrier'
+  | 'ext:timestamp-query-inside-encoders'
+  | 'ext:timestamp-query-inside-passes';
+
+type QueueDescriptor = {
+  label?: string;
+};
+
+type RequiredLimits = {
+  maxTextureDimension1D?: number;
+  maxTextureDimension2D?: number;
+  maxTextureDimension3D?: number;
+  maxTextureArrayLayers?: number;
+  maxBindGroups?: number;
+  maxBindingsPerBindGroup?: number;
+  maxDynamicUniformBuffersPerPipelineLayout?: number;
+  maxDynamicStorageBuffersPerPipelineLayout?: number;
+  maxSampledTexturesPerShaderStage?: number;
+  maxSamplersPerShaderStage?: number;
+  maxStorageBuffersPerShaderStage?: number;
+  maxStorageTexturesPerShaderStage?: number;
+  maxUniformBuffersPerShaderStage?: number;
+  maxUniformBufferBindingSize?: number;
+  maxStorageBufferBindingSize?: number;
+  minUniformBufferOffsetAlignment?: number;
+  minStorageBufferOffsetAlignment?: number;
+  maxVertexBuffers?: number;
+  maxBufferSize?: number;
+  maxVertexAttributes?: number;
+  maxVertexBufferArrayStride?: number;
+  maxInterStageShaderComponents?: number;
+  maxInterStageShaderVariables?: number;
+  maxColorAttachments?: number;
+  maxColorAttachmentBytesPerSample?: number;
+  maxComputeWorkgroupStorageSize?: number;
+  maxComputeInvocationsPerWorkgroup?: number;
+  maxComputeWorkgroupSizeX?: number;
+  maxComputeWorkgroupSizeY?: number;
+  maxComputeWorkgroupSizeZ?: number;
+  maxComputeWorkgroupsPerDimension?: number;
+  ext_maxPushConstantSize?: number;
+  ext_maxNonSamplerBindings?: number;
+};
+
+type DeviceDescriptor = {
+  label?: string;
+  requiredFeatures?: DeviceFeature[];
+  requiredLimits?: RequiredLimits;
+  defaultQueue?: QueueDescriptor;
+};
+
 export interface NitroWGPUDevice
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   readonly queue: NitroWGPUQueue;
+
+  readonly features: DeviceFeature[];
+  readonly limits: RequiredLimits;
+  readonly adapterInfo: DeviceInfo;
+  readonly lost: boolean;
 
   createBuffer(descriptor: BufferDescriptor): NitroWGPUBuffer;
   createSampler(descriptor: SamplerDescriptor): NitroWGPUSampler;
@@ -399,13 +535,38 @@ export interface NitroWGPUDevice
   ): NitroWGPUComputePipeline;
 }
 
+type DeviceInfo = {
+  architecture: string;
+  description: string;
+  device: string;
+  vendor: string;
+  subgroupMaxSize: number;
+  subgroupMinSize: number;
+};
+
+type FeatureSet = DeviceFeature[];
+
 export interface NitroWGPUAdapter
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
-  requestDevice(): Promise<NitroWGPUDevice>;
+  requestDevice(descriptor?: DeviceDescriptor): Promise<NitroWGPUDevice>;
+
+  readonly limits: RequiredLimits;
+  readonly features: FeatureSet;
+  readonly isFallbackAdapter: boolean;
+  readonly info: DeviceInfo;
 }
+
+type AdapterPowerPreference = 'low-power' | 'high-performance';
+
+type AdapterDescriptor = {
+  powerPreference?: AdapterPowerPreference;
+};
 
 export interface NitroWGPUInstance
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   enumerateAdapters(): void;
-  requestAdapter(): Promise<NitroWGPUAdapter>;
+  requestAdapter(descriptor?: AdapterDescriptor): Promise<NitroWGPUAdapter>;
+  getPreferredCanvasFormat(): TextureFormat;
+
+  registerErrorHandler(handler: (errorMessage: string) => void): void;
 }

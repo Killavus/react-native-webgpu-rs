@@ -20,10 +20,19 @@ public:
 
   void enumerateAdapters() override;
   std::shared_ptr<Promise<std::shared_ptr<HybridNitroWGPUAdapterSpec>>>
-  requestAdapter() override;
+  requestAdapter(const std::optional<AdapterDescriptor> &descriptor) override;
+  void registerErrorHandler(
+      const std::function<void(const std::string & /* errorMessage */)>
+          &handler) override;
+
+  TextureFormat getPreferredCanvasFormat() override;
+
+  void callErrorHandler(const std::string &message);
 
 private:
   WGPUInstance instance_;
+
+  std::shared_ptr<std::function<void(const std::string &)>> errorHandler_;
 };
 
 } // namespace margelo::nitro

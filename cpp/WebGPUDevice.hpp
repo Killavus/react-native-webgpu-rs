@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DeviceInfo.hpp"
 #include "HybridNitroWGPUBindGroupLayoutSpec.hpp"
 #include "HybridNitroWGPUBindGroupSpec.hpp"
 #include "HybridNitroWGPUBufferSpec.hpp"
@@ -33,7 +34,7 @@ using webgpurs::HybridNitroWGPUTextureSpec;
 class WebGPUDevice : public HybridNitroWGPUDeviceSpec {
 public:
   WebGPUDevice();
-  WebGPUDevice(WGPUDevice device);
+  WebGPUDevice(WGPUDevice device, const DeviceInfo &info);
   ~WebGPUDevice() override;
 
   std::shared_ptr<HybridNitroWGPUQueueSpec> getQueue() override;
@@ -56,8 +57,14 @@ public:
   std::shared_ptr<HybridNitroWGPUComputePipelineSpec>
   createComputePipeline(const ComputePipelineDescriptor &descriptor) override;
 
+  std::vector<DeviceFeature> getFeatures() override;
+  RequiredLimits getLimits() override;
+  DeviceInfo getAdapterInfo() override;
+  bool getLost() override;
+
 private:
   WGPUDevice device_;
+  DeviceInfo info_;
   std::shared_ptr<WebGPUQueue> queueInstance_;
 };
 

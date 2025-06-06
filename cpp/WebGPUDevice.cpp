@@ -1,4 +1,5 @@
 #include "WebGPUDevice.hpp"
+#include "WGPUTypeConversions.hpp"
 #include "WebGPUBindGroup.hpp"
 #include "WebGPUBindGroupLayout.hpp"
 #include "WebGPUBuffer.hpp"
@@ -12,351 +13,13 @@
 
 namespace margelo::nitro {
 
-static WGPUAddressMode
-toWGPUAddressMode(const SamplerAddressMode &addressMode) {
-  switch (addressMode) {
-  case SamplerAddressMode::CLAMP_TO_EDGE:
-    return WGPUAddressMode_ClampToEdge;
-  case SamplerAddressMode::MIRROR_REPEAT:
-    return WGPUAddressMode_MirrorRepeat;
-  case SamplerAddressMode::REPEAT:
-    return WGPUAddressMode_Repeat;
-  default:
-    return WGPUAddressMode_Undefined;
-  }
-}
-
-static WGPUTextureFormat toWGPUTextureFormat(const TextureFormat &format) {
-  switch (format) {
-  case TextureFormat::R8UNORM:
-    return WGPUTextureFormat_R8Unorm;
-  case TextureFormat::R8SNORM:
-    return WGPUTextureFormat_R8Snorm;
-  case TextureFormat::R8UINT:
-    return WGPUTextureFormat_R8Uint;
-  case TextureFormat::R8SINT:
-    return WGPUTextureFormat_R8Sint;
-  case TextureFormat::R16UNORM:
-    return (WGPUTextureFormat)WGPUNativeTextureFormat_R16Unorm;
-  case TextureFormat::R16SNORM:
-    return (WGPUTextureFormat)WGPUNativeTextureFormat_R16Snorm;
-  case TextureFormat::R16UINT:
-    return WGPUTextureFormat_R16Uint;
-  case TextureFormat::R16SINT:
-    return WGPUTextureFormat_R16Sint;
-  case TextureFormat::R16FLOAT:
-    return WGPUTextureFormat_R16Float;
-  case TextureFormat::RG8UNORM:
-    return WGPUTextureFormat_RG8Unorm;
-  case TextureFormat::RG8SNORM:
-    return WGPUTextureFormat_RG8Snorm;
-  case TextureFormat::RG8UINT:
-    return WGPUTextureFormat_RG8Uint;
-  case TextureFormat::RG8SINT:
-    return WGPUTextureFormat_RG8Sint;
-  case TextureFormat::R32UINT:
-    return WGPUTextureFormat_R32Uint;
-  case TextureFormat::R32SINT:
-    return WGPUTextureFormat_R32Sint;
-  case TextureFormat::R32FLOAT:
-    return WGPUTextureFormat_R32Float;
-  case TextureFormat::RG16UNORM:
-    return (WGPUTextureFormat)WGPUNativeTextureFormat_Rg16Unorm;
-  case TextureFormat::RG16SNORM:
-    return (WGPUTextureFormat)WGPUNativeTextureFormat_Rg16Snorm;
-  case TextureFormat::RG16UINT:
-    return WGPUTextureFormat_RG16Uint;
-  case TextureFormat::RG16SINT:
-    return WGPUTextureFormat_RG16Sint;
-  case TextureFormat::RG16FLOAT:
-    return WGPUTextureFormat_RG16Float;
-  case TextureFormat::RGBA8UNORM:
-    return WGPUTextureFormat_RGBA8Unorm;
-  case TextureFormat::RGBA8UNORM_SRGB:
-    return WGPUTextureFormat_RGBA8UnormSrgb;
-  case TextureFormat::RGBA8SNORM:
-    return WGPUTextureFormat_RGBA8Snorm;
-  case TextureFormat::RGBA8UINT:
-    return WGPUTextureFormat_RGBA8Uint;
-  case TextureFormat::RGBA8SINT:
-    return WGPUTextureFormat_RGBA8Sint;
-  case TextureFormat::BGRA8UNORM:
-    return WGPUTextureFormat_BGRA8Unorm;
-  case TextureFormat::BGRA8UNORM_SRGB:
-    return WGPUTextureFormat_BGRA8UnormSrgb;
-  case TextureFormat::RGB9E5UFLOAT:
-    return WGPUTextureFormat_RGB9E5Ufloat;
-  case TextureFormat::RGB10A2UINT:
-    return WGPUTextureFormat_RGB10A2Uint;
-  case TextureFormat::RGB10A2UNORM:
-    return WGPUTextureFormat_RGB10A2Unorm;
-  case TextureFormat::RG11B10UFLOAT:
-    return WGPUTextureFormat_RG11B10Ufloat;
-  case TextureFormat::RG32UINT:
-    return WGPUTextureFormat_RG32Uint;
-  case TextureFormat::RG32SINT:
-    return WGPUTextureFormat_RG32Sint;
-  case TextureFormat::RG32FLOAT:
-    return WGPUTextureFormat_RG32Float;
-  case TextureFormat::RGBA16UNORM:
-    return (WGPUTextureFormat)WGPUNativeTextureFormat_Rgba16Unorm;
-  case TextureFormat::RGBA16SNORM:
-    return (WGPUTextureFormat)WGPUNativeTextureFormat_Rgba16Snorm;
-  case TextureFormat::RGBA16UINT:
-    return WGPUTextureFormat_RGBA16Uint;
-  case TextureFormat::RGBA16SINT:
-    return WGPUTextureFormat_RGBA16Sint;
-  case TextureFormat::RGBA16FLOAT:
-    return WGPUTextureFormat_RGBA16Float;
-  case TextureFormat::RGBA32UINT:
-    return WGPUTextureFormat_RGBA32Uint;
-  case TextureFormat::RGBA32SINT:
-    return WGPUTextureFormat_RGBA32Sint;
-  case TextureFormat::RGBA32FLOAT:
-    return WGPUTextureFormat_RGBA32Float;
-  case TextureFormat::STENCIL8:
-    return WGPUTextureFormat_Stencil8;
-  case TextureFormat::DEPTH16UNORM:
-    return WGPUTextureFormat_Depth16Unorm;
-  case TextureFormat::DEPTH24PLUS:
-    return WGPUTextureFormat_Depth24Plus;
-  case TextureFormat::DEPTH24PLUS_STENCIL8:
-    return WGPUTextureFormat_Depth24PlusStencil8;
-  case TextureFormat::DEPTH32FLOAT:
-    return WGPUTextureFormat_Depth32Float;
-  case TextureFormat::DEPTH32FLOAT_STENCIL8:
-    return WGPUTextureFormat_Depth32FloatStencil8;
-  case TextureFormat::BC1_RGBA_UNORM:
-    return WGPUTextureFormat_BC1RGBAUnorm;
-  case TextureFormat::BC1_RGBA_UNORM_SRGB:
-    return WGPUTextureFormat_BC1RGBAUnormSrgb;
-  case TextureFormat::BC2_RGBA_UNORM:
-    return WGPUTextureFormat_BC2RGBAUnorm;
-  case TextureFormat::BC2_RGBA_UNORM_SRGB:
-    return WGPUTextureFormat_BC2RGBAUnormSrgb;
-  case TextureFormat::BC3_RGBA_UNORM:
-    return WGPUTextureFormat_BC3RGBAUnorm;
-  case TextureFormat::BC3_RGBA_UNORM_SRGB:
-    return WGPUTextureFormat_BC3RGBAUnormSrgb;
-  case TextureFormat::BC4_R_UNORM:
-    return WGPUTextureFormat_BC4RUnorm;
-  case TextureFormat::BC4_R_SNORM:
-    return WGPUTextureFormat_BC4RSnorm;
-  case TextureFormat::BC5_RG_UNORM:
-    return WGPUTextureFormat_BC5RGUnorm;
-  case TextureFormat::BC5_RG_SNORM:
-    return WGPUTextureFormat_BC5RGSnorm;
-  case TextureFormat::BC6H_RGB_UFLOAT:
-    return WGPUTextureFormat_BC6HRGBUfloat;
-  case TextureFormat::BC6H_RGB_FLOAT:
-    return WGPUTextureFormat_BC6HRGBFloat;
-  case TextureFormat::BC7_RGBA_UNORM:
-    return WGPUTextureFormat_BC7RGBAUnorm;
-  case TextureFormat::BC7_RGBA_UNORM_SRGB:
-    return WGPUTextureFormat_BC7RGBAUnormSrgb;
-  case TextureFormat::ETC2_RGB8UNORM:
-    return WGPUTextureFormat_ETC2RGB8Unorm;
-  case TextureFormat::ETC2_RGB8UNORM_SRGB:
-    return WGPUTextureFormat_ETC2RGB8UnormSrgb;
-  case TextureFormat::ETC2_RGB8A1UNORM:
-    return WGPUTextureFormat_ETC2RGB8A1Unorm;
-  case TextureFormat::ETC2_RGB8A1UNORM_SRGB:
-    return WGPUTextureFormat_ETC2RGB8A1UnormSrgb;
-  case TextureFormat::ETC2_RGBA8UNORM:
-    return WGPUTextureFormat_ETC2RGBA8Unorm;
-  case TextureFormat::ETC2_RGBA8UNORM_SRGB:
-    return WGPUTextureFormat_ETC2RGBA8UnormSrgb;
-  case TextureFormat::EAC_R11UNORM:
-    return WGPUTextureFormat_EACR11Unorm;
-  case TextureFormat::EAC_R11SNORM:
-    return WGPUTextureFormat_EACR11Snorm;
-  case TextureFormat::EAC_RG11UNORM:
-    return WGPUTextureFormat_EACRG11Unorm;
-  case TextureFormat::EAC_RG11SNORM:
-    return WGPUTextureFormat_EACRG11Snorm;
-  case TextureFormat::ASTC_4X4_UNORM:
-    return WGPUTextureFormat_ASTC4x4Unorm;
-  case TextureFormat::ASTC_4X4_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC4x4UnormSrgb;
-  case TextureFormat::ASTC_5X4_UNORM:
-    return WGPUTextureFormat_ASTC5x4Unorm;
-  case TextureFormat::ASTC_5X4_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC5x4UnormSrgb;
-  case TextureFormat::ASTC_5X5_UNORM:
-    return WGPUTextureFormat_ASTC5x5Unorm;
-  case TextureFormat::ASTC_5X5_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC5x5UnormSrgb;
-  case TextureFormat::ASTC_6X5_UNORM:
-    return WGPUTextureFormat_ASTC6x5Unorm;
-  case TextureFormat::ASTC_6X5_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC6x5UnormSrgb;
-  case TextureFormat::ASTC_6X6_UNORM:
-    return WGPUTextureFormat_ASTC6x6Unorm;
-  case TextureFormat::ASTC_6X6_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC6x6UnormSrgb;
-  case TextureFormat::ASTC_8X5_UNORM:
-    return WGPUTextureFormat_ASTC8x5Unorm;
-  case TextureFormat::ASTC_8X5_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC8x5UnormSrgb;
-  case TextureFormat::ASTC_8X6_UNORM:
-    return WGPUTextureFormat_ASTC8x6Unorm;
-  case TextureFormat::ASTC_8X6_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC8x6UnormSrgb;
-  case TextureFormat::ASTC_8X8_UNORM:
-    return WGPUTextureFormat_ASTC8x8Unorm;
-  case TextureFormat::ASTC_8X8_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC8x8UnormSrgb;
-  case TextureFormat::ASTC_10X5_UNORM:
-    return WGPUTextureFormat_ASTC10x5Unorm;
-  case TextureFormat::ASTC_10X5_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC10x5UnormSrgb;
-  case TextureFormat::ASTC_10X6_UNORM:
-    return WGPUTextureFormat_ASTC10x6Unorm;
-  case TextureFormat::ASTC_10X6_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC10x6UnormSrgb;
-  case TextureFormat::ASTC_10X8_UNORM:
-    return WGPUTextureFormat_ASTC10x8Unorm;
-  case TextureFormat::ASTC_10X8_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC10x8UnormSrgb;
-  case TextureFormat::ASTC_10X10_UNORM:
-    return WGPUTextureFormat_ASTC10x10Unorm;
-  case TextureFormat::ASTC_10X10_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC10x10UnormSrgb;
-  case TextureFormat::ASTC_12X10_UNORM:
-    return WGPUTextureFormat_ASTC12x10Unorm;
-  case TextureFormat::ASTC_12X10_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC12x10UnormSrgb;
-  case TextureFormat::ASTC_12X12_UNORM:
-    return WGPUTextureFormat_ASTC12x12Unorm;
-  case TextureFormat::ASTC_12X12_UNORM_SRGB:
-    return WGPUTextureFormat_ASTC12x12UnormSrgb;
-  default:
-    return WGPUTextureFormat_Undefined;
-  }
-}
-
-static WGPUTextureDimension
-toWGPUTextureDimension(const TextureDimension &dimension) {
-  switch (dimension) {
-  case TextureDimension::_1D:
-    return WGPUTextureDimension_1D;
-  case TextureDimension::_2D:
-    return WGPUTextureDimension_2D;
-  case TextureDimension::_3D:
-    return WGPUTextureDimension_3D;
-  default:
-    return WGPUTextureDimension_Undefined;
-  }
-}
-
-static WGPUFilterMode toWGPUFilterMode(const SamplerFilterType &filterType) {
-  switch (filterType) {
-  case SamplerFilterType::LINEAR:
-    return WGPUFilterMode_Linear;
-  case SamplerFilterType::NEAREST:
-    return WGPUFilterMode_Nearest;
-  default:
-    return WGPUFilterMode_Undefined;
-  }
-}
-
-static WGPUMipmapFilterMode
-toWGPUMipmapFilterMode(const SamplerFilterType &filterType) {
-  switch (filterType) {
-  case SamplerFilterType::LINEAR:
-    return WGPUMipmapFilterMode_Linear;
-  case SamplerFilterType::NEAREST:
-    return WGPUMipmapFilterMode_Nearest;
-  default:
-    return WGPUMipmapFilterMode_Undefined;
-  }
-}
-
-static WGPUSamplerBindingType
-toWGPUSamplerBindingType(const SamplerLayoutObjectBindingType &bindingType) {
-  switch (bindingType) {
-  case SamplerLayoutObjectBindingType::FILTERING:
-    return WGPUSamplerBindingType_Filtering;
-  case SamplerLayoutObjectBindingType::NON_FILTERING:
-    return WGPUSamplerBindingType_NonFiltering;
-  case SamplerLayoutObjectBindingType::COMPARISON:
-    return WGPUSamplerBindingType_Comparison;
-  default:
-    return WGPUSamplerBindingType_Undefined;
-  }
-}
-
-static WGPUTextureViewDimension toWGPUTextureViewDimension(
-    const TextureLayoutObjectViewDimension &viewDimension) {
-  switch (viewDimension) {
-  case TextureLayoutObjectViewDimension::_1D:
-    return WGPUTextureViewDimension_1D;
-  case TextureLayoutObjectViewDimension::_2D:
-    return WGPUTextureViewDimension_2D;
-  case TextureLayoutObjectViewDimension::_2D_ARRAY:
-    return WGPUTextureViewDimension_2DArray;
-  case TextureLayoutObjectViewDimension::_3D:
-    return WGPUTextureViewDimension_3D;
-  case TextureLayoutObjectViewDimension::CUBE:
-    return WGPUTextureViewDimension_Cube;
-  case TextureLayoutObjectViewDimension::CUBE_ARRAY:
-    return WGPUTextureViewDimension_CubeArray;
-  default:
-    return WGPUTextureViewDimension_Undefined;
-  }
-}
-
-static WGPUTextureSampleType
-toWGPUTextureSampleType(const TextureLayoutObjectSampleType &sampleType) {
-  switch (sampleType) {
-  case TextureLayoutObjectSampleType::FLOAT:
-    return WGPUTextureSampleType_Float;
-  case TextureLayoutObjectSampleType::UNFILTERABLE_FLOAT:
-    return WGPUTextureSampleType_UnfilterableFloat;
-  case TextureLayoutObjectSampleType::DEPTH:
-    return WGPUTextureSampleType_Depth;
-  case TextureLayoutObjectSampleType::SINT:
-    return WGPUTextureSampleType_Sint;
-  case TextureLayoutObjectSampleType::UINT:
-    return WGPUTextureSampleType_Uint;
-  default:
-    return WGPUTextureSampleType_Undefined;
-  }
-}
-
-static WGPUBufferBindingType
-toWGPUBufferBindingType(const BufferLayoutObjectBindingType &bindingType) {
-  switch (bindingType) {
-  case BufferLayoutObjectBindingType::UNIFORM:
-    return WGPUBufferBindingType_Uniform;
-  case BufferLayoutObjectBindingType::READ_ONLY_STORAGE:
-    return WGPUBufferBindingType_ReadOnlyStorage;
-  case BufferLayoutObjectBindingType::STORAGE:
-    return WGPUBufferBindingType_Storage;
-  default:
-    return WGPUBufferBindingType_Undefined;
-  }
-}
-
-static WGPUStorageTextureAccess
-toWGPUStorageTextureAccess(const StorageTextureLayoutObjectAccess &access) {
-  switch (access) {
-  case StorageTextureLayoutObjectAccess::READ_ONLY:
-    return WGPUStorageTextureAccess_ReadOnly;
-  case StorageTextureLayoutObjectAccess::READ_WRITE:
-    return WGPUStorageTextureAccess_ReadWrite;
-  case StorageTextureLayoutObjectAccess::WRITE_ONLY:
-    return WGPUStorageTextureAccess_WriteOnly;
-  default:
-    return WGPUStorageTextureAccess_Undefined;
-  }
-}
-
 WebGPUDevice::WebGPUDevice()
     : HybridObject(TAG), device_(nullptr), queueInstance_(nullptr) {}
 
-WebGPUDevice::WebGPUDevice(WGPUDevice device)
-    : HybridObject(TAG), device_(device), queueInstance_(nullptr) {}
+WebGPUDevice::WebGPUDevice(WGPUDevice device, const DeviceInfo &info)
+    : HybridObject(TAG), device_(device), queueInstance_(nullptr), info_(info) {
+
+}
 
 WebGPUDevice::~WebGPUDevice() {
   if (device_) {
@@ -757,5 +420,84 @@ WebGPUDevice::createComputePipeline(
 
   return std::make_shared<WebGPUComputePipeline>(pipeline);
 }
+
+std::vector<DeviceFeature> WebGPUDevice::getFeatures() {
+  WGPUSupportedFeatures wgpuFeatures;
+  wgpuDeviceGetFeatures(device_, &wgpuFeatures);
+  std::vector<DeviceFeature> features;
+  features.reserve(wgpuFeatures.featureCount);
+
+  for (size_t i = 0; i < wgpuFeatures.featureCount; i++) {
+    features.push_back(toNitroDeviceFeature(wgpuFeatures.features[i]));
+  }
+
+  return features;
+};
+
+RequiredLimits WebGPUDevice::getLimits() {
+  RequiredLimits limits;
+
+  WGPUNativeLimits wgpuNativeLimits{
+      .chain = {
+          .sType = (WGPUSType)WGPUSType_NativeLimits,
+      }};
+
+  WGPULimits wgpuLimits{.nextInChain = &wgpuNativeLimits.chain};
+
+  wgpuDeviceGetLimits(device_, &wgpuLimits);
+
+  limits.maxTextureDimension1D = wgpuLimits.maxTextureDimension1D;
+  limits.maxTextureDimension2D = wgpuLimits.maxTextureDimension2D;
+  limits.maxTextureDimension3D = wgpuLimits.maxTextureDimension3D;
+  limits.maxTextureArrayLayers = wgpuLimits.maxTextureArrayLayers;
+  limits.maxBindGroups = wgpuLimits.maxBindGroups;
+  limits.maxBindingsPerBindGroup = wgpuLimits.maxBindingsPerBindGroup;
+  limits.maxDynamicUniformBuffersPerPipelineLayout =
+      wgpuLimits.maxDynamicUniformBuffersPerPipelineLayout;
+  limits.maxDynamicStorageBuffersPerPipelineLayout =
+      wgpuLimits.maxDynamicStorageBuffersPerPipelineLayout;
+  limits.maxSampledTexturesPerShaderStage =
+      wgpuLimits.maxSampledTexturesPerShaderStage;
+  limits.maxSamplersPerShaderStage = wgpuLimits.maxSamplersPerShaderStage;
+  limits.maxStorageBuffersPerShaderStage =
+      wgpuLimits.maxStorageBuffersPerShaderStage;
+  limits.maxStorageTexturesPerShaderStage =
+      wgpuLimits.maxStorageTexturesPerShaderStage;
+  limits.maxUniformBuffersPerShaderStage =
+      wgpuLimits.maxUniformBuffersPerShaderStage;
+  limits.maxUniformBufferBindingSize = wgpuLimits.maxUniformBufferBindingSize;
+  limits.maxStorageBufferBindingSize = wgpuLimits.maxStorageBufferBindingSize;
+  limits.minUniformBufferOffsetAlignment =
+      wgpuLimits.minUniformBufferOffsetAlignment;
+  limits.minStorageBufferOffsetAlignment =
+      wgpuLimits.minStorageBufferOffsetAlignment;
+  limits.maxVertexBuffers = wgpuLimits.maxVertexBuffers;
+  limits.maxBufferSize = wgpuLimits.maxBufferSize;
+  limits.maxVertexAttributes = wgpuLimits.maxVertexAttributes;
+  limits.maxVertexBufferArrayStride = wgpuLimits.maxVertexBufferArrayStride;
+  limits.maxInterStageShaderComponents =
+      0; // TODO: Not supported by wgpu-native.
+  limits.maxInterStageShaderVariables = wgpuLimits.maxInterStageShaderVariables;
+  limits.maxColorAttachments = wgpuLimits.maxColorAttachments;
+  limits.maxColorAttachmentBytesPerSample =
+      wgpuLimits.maxColorAttachmentBytesPerSample;
+  limits.maxComputeWorkgroupStorageSize =
+      wgpuLimits.maxComputeWorkgroupStorageSize;
+  limits.maxComputeInvocationsPerWorkgroup =
+      wgpuLimits.maxComputeInvocationsPerWorkgroup;
+  limits.maxComputeWorkgroupSizeX = wgpuLimits.maxComputeWorkgroupSizeX;
+  limits.maxComputeWorkgroupSizeY = wgpuLimits.maxComputeWorkgroupSizeY;
+  limits.maxComputeWorkgroupSizeZ = wgpuLimits.maxComputeWorkgroupSizeZ;
+  limits.maxComputeWorkgroupsPerDimension =
+      wgpuLimits.maxComputeWorkgroupsPerDimension;
+  limits.ext_maxPushConstantSize = wgpuNativeLimits.maxPushConstantSize;
+  limits.ext_maxNonSamplerBindings = wgpuNativeLimits.maxNonSamplerBindings;
+
+  return limits;
+};
+
+DeviceInfo WebGPUDevice::getAdapterInfo() { return info_; };
+
+bool WebGPUDevice::getLost() { return false; };
 
 } // namespace margelo::nitro

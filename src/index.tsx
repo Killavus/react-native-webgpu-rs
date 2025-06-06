@@ -36,4 +36,8 @@ export const GPUMapMode = {
   MAP_WRITE: 0x2,
 };
 
+Instance.registerErrorHandler((errorMessage: string) => {
+  console.error(errorMessage);
+});
+
 export { Instance };

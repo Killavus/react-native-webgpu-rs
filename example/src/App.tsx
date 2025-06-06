@@ -1,4 +1,5 @@
-import { Text, View, StyleSheet, Pressable } from 'react-native';
+import { useState } from 'react';
+import { Text, View, StyleSheet, TextInput, Button } from 'react-native';
 import {
   Instance,
   GPUBufferUsage,
@@ -54,18 +55,34 @@ export default function App() {
   const handleClick = async () => {
     try {
       const adapter = await Instance.requestAdapter();
+      const numbersList = new Uint32Array(
+        text.split(',').map((chunk) => parseInt(chunk.trim(), 10))
+      );
+
       console.log('adapter', adapter);
-      const device = await adapter.requestDevice();
+      console.log('adapter.features', adapter.features);
+      console.log('adapter.limits', adapter.limits);
+      console.log('adapter.isFallbackAdapter', adapter.isFallbackAdapter);
+      console.log('adapter.info', adapter.info);
+
+      const device = await adapter.requestDevice({
+        label: 'TestDevice',
+        defaultQueue: {
+          label: 'TestQueue',
+        },
+        // requiredFeatures: ['ext:texture-format-16bit-norm', 'ext:push-constants'],
+      });
+
       console.log('device', device);
 
       const stagingBuffer = device.createBuffer({
-        size: 16,
+        size: numbersList.byteLength,
         label: 'StagingBuffer',
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
       });
 
       const storageBuffer = device.createBuffer({
-        size: 16,
+        size: numbersList.byteLength,
         label: 'StorageBuffer',
         usage:
           GPUBufferUsage.STORAGE |
@@ -107,13 +124,12 @@ export default function App() {
 
       const texture = device.createTexture({
         label: 'TestTexture',
-        size: [512, 512, 1],
-        format: 'rgba8unorm',
-        usage:
-          GPUTextureUsage.TEXTURE_BINDING |
-          GPUTextureUsage.COPY_DST |
-          GPUTextureUsage.RENDER_ATTACHMENT,
+        size: [240, 510, 1],
+        format: 'rgba16unorm',
+        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
       });
+
+      console.log('textureFormat', texture.format);
 
       const pipelineLayout = device.createPipelineLayout({
         label: 'TestPipelineLayout',
@@ -135,16 +151,18 @@ export default function App() {
 
       passEncoder.setPipeline(computePipeline);
       passEncoder.setBindGroup(0, bindGroup);
-      passEncoder.dispatchWorkgroups(4, 1, 1);
+      passEncoder.dispatchWorkgroups(numbersList.length, 1, 1);
       passEncoder.end();
 
-      commandEncoder.copyBufferToBuffer(storageBuffer, 0, stagingBuffer, 0, 16);
-
-      device.queue.writeBuffer(
+      commandEncoder.copyBufferToBuffer(
         storageBuffer,
         0,
-        new Uint32Array([1, 2, 3, 4]).buffer
+        stagingBuffer,
+        0,
+        numbersList.byteLength
       );
+
+      device.queue.writeBuffer(storageBuffer, 0, numbersList.buffer);
       device.queue.submit([commandEncoder.finish()]);
 
       console.log('submitted work');
@@ -153,8 +171,9 @@ export default function App() {
 
       console.log('mapAsyncComplete');
 
-      const mappedRange = stagingBuffer.getMappedRange();
-      console.log('mappedRange', Array.from(new Uint32Array(mappedRange)));
+      const mappedRange = new Uint32Array(stagingBuffer.getMappedRange());
+      console.log('mappedRange', mappedRange);
+      setResult(new Uint32Array(mappedRange));
 
       console.log('buffer', storageBuffer);
       console.log('queue', device.queue);
@@ -171,11 +190,36 @@ export default function App() {
     }
   };
 
+  const [result, setResult] = useState<Uint32Array | null>(null);
+
+  const [text, setText] = useState('1, 2, 3, 4');
+
+  const handleChangeText = (text: string) => {
+    setText(text);
+  };
+
   return (
     <View style={styles.container}>
-      <Pressable onPress={handleClick}>
-        <Text>Click me</Text>
-      </Pressable>
+      <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+        Collatz Conjecture
+      </Text>
+      <TextInput
+        style={{
+          width: '100%',
+          height: 40,
+          borderColor: 'gray',
+          borderWidth: 1,
+          paddingHorizontal: 8,
+        }}
+        onChangeText={handleChangeText}
+        value={text}
+      />
+      <Button onPress={handleClick} title="Compute" />
+      {result ? (
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+          {result.join(', ')}
+        </Text>
+      ) : null}
     </View>
   );
 }
@@ -183,6 +227,8 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
+    gap: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
