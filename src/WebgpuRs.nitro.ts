@@ -291,17 +291,35 @@ type ComputePipelineDescriptor = {
   compute: ComputePipelineComputeDescriptor;
 };
 
+type ComputePassDescriptor = {
+  label?: string;
+  // timestampWrites?: ComputePassTimestampWrite[];
+};
+
 export interface NitroWGPUBuffer
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 export interface NitroWGPUQueue
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  submit(commandBuffers: NitroWGPUCommandBuffer[]): void;
+}
+
+type CommandBufferDescriptor = {
+  label?: string;
+};
+
 export interface NitroWGPUSampler
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
 export interface NitroWGPUShaderModule
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
-
-export interface NitroWGPUCommandEncoder
+export interface NitroWGPUCommandBuffer
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+export interface NitroWGPUCommandEncoder
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  beginComputePass(
+    descriptor: ComputePassDescriptor
+  ): NitroWGPUComputePassEncoder;
+  finish(descriptor?: CommandBufferDescriptor): NitroWGPUCommandBuffer;
+}
 
 export interface NitroWGPUTexture
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
@@ -320,6 +338,24 @@ export interface NitroWGPUPipelineLayout
 
 export interface NitroWGPUComputePipeline
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+
+type EncodedBindGroup = NitroWGPUBindGroup | null;
+
+export interface NitroWGPUComputePassEncoder
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  setPipeline(pipeline: NitroWGPUComputePipeline): void;
+  setBindGroup(index: number, bindGroup: EncodedBindGroup): void;
+  dispatchWorkgroups(
+    workgroupCountX: number,
+    workgroupCountY: number,
+    workgroupCountZ: number
+  ): void;
+  // dispatchWorkgroupsIndirect(indirectBuffer: NitroWGPUBuffer, indirectOffset: number): void;
+  // popDebugGroup(): void;
+  // pushDebugGroup(groupLabel: string): void;
+  // insertDebugMarker(markerLabel: string): void;
+  end(): void;
+}
 
 export interface NitroWGPUDevice
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {

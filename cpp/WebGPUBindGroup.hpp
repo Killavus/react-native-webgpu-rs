@@ -12,6 +12,8 @@ public:
   WebGPUBindGroup();
   WebGPUBindGroup(WGPUBindGroup group);
   ~WebGPUBindGroup() override;
+  
+  const WGPUBindGroup& resource() const;
 private:
   WGPUBindGroup group_;
 };

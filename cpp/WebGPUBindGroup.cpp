@@ -8,4 +8,6 @@ WebGPUBindGroup::~WebGPUBindGroup() {
     wgpuBindGroupRelease(group_);
   }
 }
+
+const WGPUBindGroup& WebGPUBindGroup::resource() const { return group_; }
 }

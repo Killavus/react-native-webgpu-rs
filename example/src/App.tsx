@@ -130,6 +130,17 @@ export default function App() {
         },
       });
 
+      const passEncoder = commandEncoder.beginComputePass({
+        label: 'TestComputePassEncoder',
+      });
+
+      passEncoder.setPipeline(computePipeline);
+      passEncoder.setBindGroup(0, bindGroup);
+      passEncoder.dispatchWorkgroups(1, 1, 1);
+      passEncoder.end();
+
+      device.queue.submit([commandEncoder.finish()]);
+
       console.log('buffer', storageBuffer);
       console.log('queue', device.queue);
       console.log('sampler', sampler);
