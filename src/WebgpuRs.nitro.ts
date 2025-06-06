@@ -517,10 +517,10 @@ export interface NitroWGPUDevice
   readonly lost: boolean;
 
   createBuffer(descriptor: BufferDescriptor): NitroWGPUBuffer;
-  createSampler(descriptor: SamplerDescriptor): NitroWGPUSampler;
+  createSampler(descriptor?: SamplerDescriptor): NitroWGPUSampler;
   createShaderModule(descriptor: ShaderModuleDescriptor): NitroWGPUShaderModule;
   createCommandEncoder(
-    descriptor: CommandEncoderDescriptor
+    descriptor?: CommandEncoderDescriptor
   ): NitroWGPUCommandEncoder;
   createTexture(descriptor: TextureDescriptor): NitroWGPUTexture;
   createBindGroupLayout(

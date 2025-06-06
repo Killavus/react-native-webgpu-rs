@@ -125,8 +125,11 @@ export default function App() {
       const texture = device.createTexture({
         label: 'TestTexture',
         size: [240, 510, 1],
-        format: 'rgba16unorm',
-        usage: GPUTextureUsage.TEXTURE_BINDING | GPUTextureUsage.COPY_DST,
+        format: 'rgba8unorm',
+        usage:
+          GPUTextureUsage.TEXTURE_BINDING |
+          GPUTextureUsage.COPY_DST |
+          GPUTextureUsage.RENDER_ATTACHMENT,
       });
 
       console.log('textureFormat', texture.format);

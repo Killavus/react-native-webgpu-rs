@@ -56,36 +56,42 @@ WebGPUDevice::createBuffer(const BufferDescriptor &descriptor) {
   return std::make_shared<WebGPUBuffer>(buffer, device_);
 }
 
-std::shared_ptr<HybridNitroWGPUSamplerSpec>
-WebGPUDevice::createSampler(const SamplerDescriptor &descriptor) {
+std::shared_ptr<HybridNitroWGPUSamplerSpec> WebGPUDevice::createSampler(
+    const std::optional<SamplerDescriptor> &descriptorM) {
   WGPUSamplerDescriptor wgpuDescriptor{0};
 
-  wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
-  if (descriptor.label.has_value()) {
-    wgpuDescriptor.label = {descriptor.label.value().c_str(), WGPU_STRLEN};
+  bool hasDescriptor = descriptorM.has_value();
+
+  if (hasDescriptor) {
+    auto descriptor = descriptorM.value();
+    wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
+    if (descriptor.label.has_value()) {
+      wgpuDescriptor.label = {descriptor.label.value().c_str(), WGPU_STRLEN};
+    }
+
+    wgpuDescriptor.addressModeU = toWGPUAddressMode(
+        descriptor.addressModeU.value_or(SamplerAddressMode::CLAMP_TO_EDGE));
+    wgpuDescriptor.addressModeV = toWGPUAddressMode(
+        descriptor.addressModeV.value_or(SamplerAddressMode::CLAMP_TO_EDGE));
+    wgpuDescriptor.addressModeW = toWGPUAddressMode(
+        descriptor.addressModeW.value_or(SamplerAddressMode::CLAMP_TO_EDGE));
+
+    wgpuDescriptor.lodMaxClamp = descriptor.lodMaxClamp.value_or(32);
+    wgpuDescriptor.lodMinClamp = descriptor.lodMinClamp.value_or(0);
+    wgpuDescriptor.maxAnisotropy = descriptor.maxAnisotropy.value_or(1);
+
+    wgpuDescriptor.magFilter = toWGPUFilterMode(
+        descriptor.magFilter.value_or(SamplerFilterType::NEAREST));
+    wgpuDescriptor.minFilter = toWGPUFilterMode(
+        descriptor.minFilter.value_or(SamplerFilterType::NEAREST));
+    wgpuDescriptor.mipmapFilter = toWGPUMipmapFilterMode(
+        descriptor.mipmapFilter.value_or(SamplerFilterType::NEAREST));
+
+    wgpuDescriptor.nextInChain = nullptr;
   }
 
-  wgpuDescriptor.addressModeU = toWGPUAddressMode(
-      descriptor.addressModeU.value_or(SamplerAddressMode::CLAMP_TO_EDGE));
-  wgpuDescriptor.addressModeV = toWGPUAddressMode(
-      descriptor.addressModeV.value_or(SamplerAddressMode::CLAMP_TO_EDGE));
-  wgpuDescriptor.addressModeW = toWGPUAddressMode(
-      descriptor.addressModeW.value_or(SamplerAddressMode::CLAMP_TO_EDGE));
-
-  wgpuDescriptor.lodMaxClamp = descriptor.lodMaxClamp.value_or(32);
-  wgpuDescriptor.lodMinClamp = descriptor.lodMinClamp.value_or(0);
-  wgpuDescriptor.maxAnisotropy = descriptor.maxAnisotropy.value_or(1);
-
-  wgpuDescriptor.magFilter = toWGPUFilterMode(
-      descriptor.magFilter.value_or(SamplerFilterType::NEAREST));
-  wgpuDescriptor.minFilter = toWGPUFilterMode(
-      descriptor.minFilter.value_or(SamplerFilterType::NEAREST));
-  wgpuDescriptor.mipmapFilter = toWGPUMipmapFilterMode(
-      descriptor.mipmapFilter.value_or(SamplerFilterType::NEAREST));
-
-  wgpuDescriptor.nextInChain = nullptr;
-
-  WGPUSampler sampler = wgpuDeviceCreateSampler(device_, &wgpuDescriptor);
+  WGPUSampler sampler = wgpuDeviceCreateSampler(
+      device_, hasDescriptor ? &wgpuDescriptor : nullptr);
 
   return std::make_shared<WebGPUSampler>(sampler);
 }
@@ -112,16 +118,23 @@ WebGPUDevice::createShaderModule(const ShaderModuleDescriptor &descriptor) {
 }
 
 std::shared_ptr<HybridNitroWGPUCommandEncoderSpec>
-WebGPUDevice::createCommandEncoder(const CommandEncoderDescriptor &descriptor) {
+WebGPUDevice::createCommandEncoder(
+    const std::optional<CommandEncoderDescriptor> &descriptorM) {
+
+  bool hasDescriptor = descriptorM.has_value();
   WGPUCommandEncoderDescriptor wgpuDescriptor{0};
-  wgpuDescriptor.nextInChain = nullptr;
-  wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
-  if (descriptor.label.has_value()) {
-    wgpuDescriptor.label = {descriptor.label.value().c_str(), WGPU_STRLEN};
+
+  if (hasDescriptor) {
+    auto descriptor = descriptorM.value();
+    wgpuDescriptor.nextInChain = nullptr;
+    wgpuDescriptor.label = {nullptr, WGPU_STRLEN};
+    if (descriptor.label.has_value()) {
+      wgpuDescriptor.label = {descriptor.label.value().c_str(), WGPU_STRLEN};
+    }
   }
 
-  WGPUCommandEncoder encoder{
-      wgpuDeviceCreateCommandEncoder(device_, &wgpuDescriptor)};
+  WGPUCommandEncoder encoder{wgpuDeviceCreateCommandEncoder(
+      device_, hasDescriptor ? &wgpuDescriptor : nullptr)};
 
   return std::make_shared<WebGPUCommandEncoder>(encoder);
 }

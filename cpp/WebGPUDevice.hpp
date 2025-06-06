@@ -41,11 +41,11 @@ public:
   std::shared_ptr<HybridNitroWGPUBufferSpec>
   createBuffer(const BufferDescriptor &descriptor) override;
   std::shared_ptr<HybridNitroWGPUSamplerSpec>
-  createSampler(const SamplerDescriptor &descriptor) override;
+  createSampler(const std::optional<SamplerDescriptor> &descriptor) override;
   std::shared_ptr<HybridNitroWGPUShaderModuleSpec>
   createShaderModule(const ShaderModuleDescriptor &descriptor) override;
-  std::shared_ptr<HybridNitroWGPUCommandEncoderSpec>
-  createCommandEncoder(const CommandEncoderDescriptor &descriptor) override;
+  std::shared_ptr<HybridNitroWGPUCommandEncoderSpec> createCommandEncoder(
+      const std::optional<CommandEncoderDescriptor> &descriptor) override;
   std::shared_ptr<HybridNitroWGPUTextureSpec>
   createTexture(const TextureDescriptor &descriptor) override;
   std::shared_ptr<HybridNitroWGPUBindGroupLayoutSpec>
