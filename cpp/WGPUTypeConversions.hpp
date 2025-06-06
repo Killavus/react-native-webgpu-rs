@@ -7,11 +7,11 @@
 #include "SamplerFilterType.hpp"
 #include "SamplerLayoutObjectBindingType.hpp"
 #include "StorageTextureLayoutObjectAccess.hpp"
+#include "TextureAspect.hpp"
 #include "TextureDimension.hpp"
 #include "TextureFormat.hpp"
 #include "TextureLayoutObjectSampleType.hpp"
 #include "TextureLayoutObjectViewDimension.hpp"
-#include "TextureViewAspect.hpp"
 
 namespace margelo::nitro {
 WGPUStorageTextureAccess
@@ -30,7 +30,7 @@ WGPUFilterMode toWGPUFilterMode(const SamplerFilterType &filterType);
 WGPUTextureDimension toWGPUTextureDimension(const TextureDimension &dimension);
 WGPUTextureFormat toWGPUTextureFormat(const TextureFormat &format);
 WGPUAddressMode toWGPUAddressMode(const SamplerAddressMode &addressMode);
-WGPUTextureAspect toWGPUTextureAspect(const TextureViewAspect &aspect);
+WGPUTextureAspect toWGPUTextureAspect(const TextureAspect &aspect);
 TextureDimension toNitroTextureDimension(const WGPUTextureDimension &dimension);
 TextureFormat toNitroTextureFormat(const WGPUTextureFormat &dimension);
 WGPUFeatureName toWGPUFeatureName(const DeviceFeature &feature);

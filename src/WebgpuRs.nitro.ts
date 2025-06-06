@@ -303,6 +303,26 @@ export interface NitroWGPUBuffer
   unmap(): void;
 }
 
+type WriteTextureOrigin = WriteTextureOriginObject | number[];
+type WriteTextureOriginObject = {
+  x: number;
+  y: number;
+  z: number;
+};
+
+type WriteTextureDestination = {
+  aspect?: TextureAspect;
+  mipLevel?: number;
+  origin?: WriteTextureOrigin;
+  texture: NitroWGPUTexture;
+};
+
+type WriteTextureDataLayout = {
+  offset?: number;
+  bytesPerRow?: number;
+  rowsPerImage?: number;
+};
+
 export interface NitroWGPUQueue
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   submit(commandBuffers: NitroWGPUCommandBuffer[]): void;
@@ -313,7 +333,21 @@ export interface NitroWGPUQueue
     dataOffset?: number,
     size?: number
   ): void;
+
+  writeTexture(
+    source: WriteTextureDestination,
+    data: ArrayBuffer,
+    dataLayout: WriteTextureDataLayout,
+    size: WriteTextureExtent
+  ): void;
 }
+
+type WriteTextureExtent = WriteTextureExtentObject | number[];
+type WriteTextureExtentObject = {
+  width: number;
+  height?: number;
+  depthOrArrayLayers?: number;
+};
 
 type CommandBufferDescriptor = {
   label?: string;
@@ -340,11 +374,11 @@ export interface NitroWGPUCommandEncoder
   finish(descriptor?: CommandBufferDescriptor): NitroWGPUCommandBuffer;
 }
 
-type TextureViewAspect = 'all' | 'stencil-only' | 'depth-only';
+type TextureAspect = 'all' | 'stencil-only' | 'depth-only';
 
 type TextureViewDescriptor = {
   label?: string;
-  aspect?: TextureViewAspect;
+  aspect?: TextureAspect;
   arrayLayerCount?: number;
   baseArrayLayer?: number;
   baseMipLevel?: number;

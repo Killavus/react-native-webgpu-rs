@@ -26,6 +26,11 @@ public:
                    const std::shared_ptr<ArrayBuffer> &data,
                    std::optional<double> dataOffset,
                    std::optional<double> size) override;
+  void writeTexture(const WriteTextureDestination &source,
+                    const std::shared_ptr<ArrayBuffer> &data,
+                    const WriteTextureDataLayout &dataLayout,
+                    const std::variant<WriteTextureExtentObject,
+                                       std::vector<double>> &size) override;
 
 private:
   WGPUQueue queue_;

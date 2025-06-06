@@ -33,7 +33,7 @@ WebGPUTexture::createView(const TextureViewDescriptor &descriptor) {
           : WGPUTextureViewDimension_Undefined;
 
   wgpuDescriptor.aspect =
-      toWGPUTextureAspect(descriptor.aspect.value_or(TextureViewAspect::ALL));
+      toWGPUTextureAspect(descriptor.aspect.value_or(TextureAspect::ALL));
   wgpuDescriptor.baseArrayLayer =
       (uint32_t)descriptor.baseArrayLayer.value_or(0);
   wgpuDescriptor.baseMipLevel = (uint32_t)descriptor.baseMipLevel.value_or(0);
@@ -108,5 +108,7 @@ TextureFormat WebGPUTexture::getFormat() {
 double WebGPUTexture::getUsage() {
   return (double)wgpuTextureGetUsage(texture_);
 };
+
+const WGPUTexture &WebGPUTexture::resource() const { return texture_; }
 
 } // namespace margelo::nitro

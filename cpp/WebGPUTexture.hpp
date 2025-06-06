@@ -18,11 +18,10 @@ public:
 
   std::shared_ptr<HybridNitroWGPUTextureViewSpec>
   createView(const TextureViewDescriptor &descriptor) override;
-
-private:
-  uint32_t
-  deduceTextureViewArrayCount(const WGPUTextureViewDimension &dimension,
-                              uint32_t baseArrayLayer);
+  void writeTexture(const WriteTextureDestination &source,
+                    const std::shared_ptr<ArrayBuffer> &data,
+                    const WriteTextureDataLayout &dataLayout,
+                    double size) override;
   double getWidth() override;
   double getHeight() override;
   double getDepthOrArrayLayers() override;
@@ -31,6 +30,13 @@ private:
   TextureDimension getDimension() override;
   TextureFormat getFormat() override;
   double getUsage() override;
+
+  const WGPUTexture &resource() const;
+
+private:
+  uint32_t
+  deduceTextureViewArrayCount(const WGPUTextureViewDimension &dimension,
+                              uint32_t baseArrayLayer);
 
   WGPUTexture texture_;
 };

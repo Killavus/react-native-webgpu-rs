@@ -339,13 +339,13 @@ toWGPUStorageTextureAccess(const StorageTextureLayoutObjectAccess &access) {
   }
 }
 
-WGPUTextureAspect toWGPUTextureAspect(const TextureViewAspect &aspect) {
+WGPUTextureAspect toWGPUTextureAspect(const TextureAspect &aspect) {
   switch (aspect) {
-  case TextureViewAspect::ALL:
+  case TextureAspect::ALL:
     return WGPUTextureAspect_All;
-  case TextureViewAspect::DEPTH_ONLY:
+  case TextureAspect::DEPTH_ONLY:
     return WGPUTextureAspect_DepthOnly;
-  case TextureViewAspect::STENCIL_ONLY:
+  case TextureAspect::STENCIL_ONLY:
     return WGPUTextureAspect_StencilOnly;
   default:
     return WGPUTextureAspect_Undefined;

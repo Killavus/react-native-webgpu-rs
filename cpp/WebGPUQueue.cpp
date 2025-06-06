@@ -1,6 +1,8 @@
 #include "WebGPUQueue.hpp"
+#include "WGPUTypeConversions.hpp"
 #include "WebGPUBuffer.hpp"
 #include "WebGPUCommandBuffer.hpp"
+#include "WebGPUTexture.hpp"
 
 namespace margelo::nitro {
 WebGPUQueue::WebGPUQueue() : HybridObject(TAG), queue_(nullptr) {}
@@ -33,6 +35,75 @@ void WebGPUQueue::writeBuffer(
                        data.get()->data() + (uint64_t)dataOffset.value_or(0),
                        size.value_or(wgpuBufferGetSize(wgpuBuffer) -
                                      (size_t)dataOffset.value_or(0)));
+}
+
+void WebGPUQueue::writeTexture(
+    const WriteTextureDestination &source,
+    const std::shared_ptr<ArrayBuffer> &data,
+    const WriteTextureDataLayout &dataLayout,
+    const std::variant<WriteTextureExtentObject, std::vector<double>> &size) {
+  WGPUTexelCopyTextureInfo wgpuDestination{0};
+  WGPUTexelCopyBufferLayout wgpuDataLayout{0};
+  WGPUExtent3D wgpuExtent{0};
+
+  wgpuDestination.texture =
+      dynamic_cast<WebGPUTexture *>(source.texture.get())->resource();
+  wgpuDestination.aspect = source.aspect.has_value()
+                               ? toWGPUTextureAspect(source.aspect.value())
+                               : WGPUTextureAspect_All;
+  wgpuDestination.mipLevel = (uint32_t)source.mipLevel.value_or(0);
+
+  wgpuDestination.origin = {.x = 0, .y = 0, .z = 0};
+  if (source.origin.has_value()) {
+    auto sourceOrigin = source.origin.value();
+
+    if (std::holds_alternative<WriteTextureOriginObject>(sourceOrigin)) {
+      auto sourceOriginObject =
+          std::get<WriteTextureOriginObject>(sourceOrigin);
+
+      wgpuDestination.origin = {.x = (uint32_t)sourceOriginObject.x,
+                                .y = (uint32_t)sourceOriginObject.y,
+                                .z = (uint32_t)sourceOriginObject.z};
+    } else {
+      auto sourceOriginArray = std::get<std::vector<double>>(sourceOrigin);
+      if (sourceOriginArray.size() > 2) {
+        wgpuDestination.origin = {.x = (uint32_t)sourceOriginArray[0],
+                                  .y = (uint32_t)sourceOriginArray[1],
+                                  .z = (uint32_t)sourceOriginArray[2]};
+      }
+    }
+  }
+
+  if (std::holds_alternative<WriteTextureExtentObject>(size)) {
+    auto sizeObject = std::get<WriteTextureExtentObject>(size);
+
+    wgpuExtent.width = (uint32_t)sizeObject.width;
+    wgpuExtent.height = (uint32_t)sizeObject.height.value_or(1);
+    wgpuExtent.depthOrArrayLayers =
+        (uint32_t)sizeObject.depthOrArrayLayers.value_or(1);
+  } else {
+    auto sizeArray = std::get<std::vector<double>>(size);
+
+    wgpuExtent.width = sizeArray.size() > 0
+                           ? (uint32_t)sizeArray[0]
+                           : wgpuTextureGetWidth(dynamic_cast<WebGPUTexture *>(
+                                                     source.texture.get())
+                                                     ->resource());
+    wgpuExtent.height = sizeArray.size() > 1 ? (uint32_t)sizeArray[1] : 1;
+    wgpuExtent.depthOrArrayLayers =
+        sizeArray.size() > 2 ? (uint32_t)sizeArray[2] : 1;
+  }
+
+  wgpuDataLayout.offset = (uint64_t)dataLayout.offset.value_or(0);
+  wgpuDataLayout.bytesPerRow = dataLayout.bytesPerRow.has_value()
+                                   ? (uint32_t)dataLayout.bytesPerRow.value()
+                                   : WGPU_COPY_STRIDE_UNDEFINED;
+  wgpuDataLayout.rowsPerImage = dataLayout.rowsPerImage.has_value()
+                                    ? (uint32_t)dataLayout.rowsPerImage.value()
+                                    : WGPU_COPY_STRIDE_UNDEFINED;
+
+  wgpuQueueWriteTexture(queue_, &wgpuDestination, (void *)data->data(),
+                        data->size(), &wgpuDataLayout, &wgpuExtent);
 }
 
 } // namespace margelo::nitro
