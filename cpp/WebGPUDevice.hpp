@@ -6,7 +6,8 @@
  #include "HybridNitroWGPUQueueSpec.hpp"
  #include "HybridNitroWGPUSamplerSpec.hpp"
  #include "HybridNitroWGPUShaderModuleSpec.hpp"
-
+ #include "HybridNitroWGPUCommandEncoderSpec.hpp"
+ #include "HybridNitroWGPUTextureSpec.hpp"
 
  #include "WebGPUQueue.hpp"
  #include <webgpu/wgpu.h>
@@ -18,7 +19,8 @@
  using webgpurs::HybridNitroWGPUBufferSpec;
  using webgpurs::HybridNitroWGPUSamplerSpec;
  using webgpurs::HybridNitroWGPUShaderModuleSpec;
-
+ using webgpurs::HybridNitroWGPUCommandEncoderSpec;
+ using webgpurs::HybridNitroWGPUTextureSpec;
 
  class WebGPUDevice : public HybridNitroWGPUDeviceSpec {
  public:
@@ -30,7 +32,8 @@
    std::shared_ptr<HybridNitroWGPUBufferSpec> createBuffer(const BufferDescriptor& descriptor) override;
    std::shared_ptr<HybridNitroWGPUSamplerSpec> createSampler(const SamplerDescriptor& descriptor) override;
    std::shared_ptr<HybridNitroWGPUShaderModuleSpec> createShaderModule(const ShaderModuleDescriptor& descriptor) override;
-   
+   std::shared_ptr<HybridNitroWGPUCommandEncoderSpec> createCommandEncoder(const CommandEncoderDescriptor& descriptor) override;
+   std::shared_ptr<HybridNitroWGPUTextureSpec> createTexture(const TextureDescriptor& descriptor) override;
  private:
    WGPUDevice device_;
    std::shared_ptr<WebGPUQueue> queueInstance_;

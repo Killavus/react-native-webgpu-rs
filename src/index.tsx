@@ -17,4 +17,12 @@ export const GPUBufferUsage = {
   VERTEX: 0x0020,
 };
 
+export const GPUTextureUsage = {
+  COPY_SRC: 0x01,
+  COPY_DST: 0x02,
+  RENDER_ATTACHMENT: 0x10,
+  STORAGE_BINDING: 0x08,
+  TEXTURE_BINDING: 0x04,
+};
+
 export { Instance };

@@ -1,5 +1,9 @@
 import { Text, View, StyleSheet, Pressable } from 'react-native';
-import { Instance, GPUBufferUsage } from 'react-native-webgpu-rs';
+import {
+  Instance,
+  GPUBufferUsage,
+  GPUTextureUsage,
+} from 'react-native-webgpu-rs';
 
 const SHADER_CODE = `
 struct VertexOut {
@@ -50,10 +54,26 @@ export default function App() {
         label: 'TestShaderModule',
       });
 
+      const commandEncoder = device.createCommandEncoder({
+        label: 'TestCommandEncoder',
+      });
+
+      const texture = device.createTexture({
+        label: 'TestTexture',
+        size: [512, 512, 1],
+        format: 'rgba8unorm',
+        usage:
+          GPUTextureUsage.TEXTURE_BINDING |
+          GPUTextureUsage.COPY_DST |
+          GPUTextureUsage.RENDER_ATTACHMENT,
+      });
+
       console.log('buffer', buffer);
       console.log('queue', device.queue);
       console.log('sampler', sampler);
       console.log('shaderModule', shaderModule);
+      console.log('commandEncoder', commandEncoder);
+      console.log('texture', texture);
     } catch (error) {
       console.log(error);
     }
