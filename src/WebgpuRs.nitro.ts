@@ -297,10 +297,22 @@ type ComputePassDescriptor = {
 };
 
 export interface NitroWGPUBuffer
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  mapAsync(mode: number, offset?: number, size?: number): Promise<void>;
+  getMappedRange(offset?: number, size?: number): ArrayBuffer;
+  unmap(): void;
+}
+
 export interface NitroWGPUQueue
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
   submit(commandBuffers: NitroWGPUCommandBuffer[]): void;
+  writeBuffer(
+    buffer: NitroWGPUBuffer,
+    bufferOffset: number,
+    data: ArrayBuffer,
+    dataOffset?: number,
+    size?: number
+  ): void;
 }
 
 type CommandBufferDescriptor = {
@@ -318,6 +330,13 @@ export interface NitroWGPUCommandEncoder
   beginComputePass(
     descriptor: ComputePassDescriptor
   ): NitroWGPUComputePassEncoder;
+  copyBufferToBuffer(
+    source: NitroWGPUBuffer,
+    sourceOffset: number,
+    destination: NitroWGPUBuffer,
+    destinationOffset: number,
+    size: number
+  ): void;
   finish(descriptor?: CommandBufferDescriptor): NitroWGPUCommandBuffer;
 }
 

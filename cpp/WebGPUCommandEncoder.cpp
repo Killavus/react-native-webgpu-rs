@@ -1,6 +1,7 @@
 #include "WebGPUCommandEncoder.hpp"
 #include "WebGPUComputePassEncoder.hpp"
 #include "WebGPUCommandBuffer.hpp"
+#include "WebGPUBuffer.hpp"
 
 namespace margelo::nitro {
 WebGPUCommandEncoder::WebGPUCommandEncoder() : HybridObject(TAG), commandEncoder_(nullptr) {}
@@ -49,5 +50,11 @@ std::shared_ptr<HybridNitroWGPUCommandBufferSpec> WebGPUCommandEncoder::finish(c
   
 };
 
+void WebGPUCommandEncoder::copyBufferToBuffer(const std::shared_ptr<HybridNitroWGPUBufferSpec>& source, double sourceOffset, const std::shared_ptr<HybridNitroWGPUBufferSpec>& destination, double destinationOffset, double size) {
+  auto wgpuSource = dynamic_cast<WebGPUBuffer*>(source.get())->resource();
+  auto wgpuDestination = dynamic_cast<WebGPUBuffer*>(destination.get())->resource();
+  
+  wgpuCommandEncoderCopyBufferToBuffer(commandEncoder_, wgpuSource, (uint64_t) sourceOffset, wgpuDestination, (uint64_t) destinationOffset, (uint64_t) size);
+}
 
 }

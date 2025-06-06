@@ -4,6 +4,7 @@ import {
   GPUBufferUsage,
   GPUTextureUsage,
   GPUShaderStage,
+  GPUMapMode,
 } from 'react-native-webgpu-rs';
 
 const SHADER_CODE = `
@@ -57,13 +58,11 @@ export default function App() {
       const device = await adapter.requestDevice();
       console.log('device', device);
 
-      /*
       const stagingBuffer = device.createBuffer({
         size: 16,
         label: 'StagingBuffer',
         usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
       });
-      */
 
       const storageBuffer = device.createBuffer({
         size: 16,
@@ -136,10 +135,26 @@ export default function App() {
 
       passEncoder.setPipeline(computePipeline);
       passEncoder.setBindGroup(0, bindGroup);
-      passEncoder.dispatchWorkgroups(1, 1, 1);
+      passEncoder.dispatchWorkgroups(4, 1, 1);
       passEncoder.end();
 
+      commandEncoder.copyBufferToBuffer(storageBuffer, 0, stagingBuffer, 0, 16);
+
+      device.queue.writeBuffer(
+        storageBuffer,
+        0,
+        new Uint32Array([1, 2, 3, 4]).buffer
+      );
       device.queue.submit([commandEncoder.finish()]);
+
+      console.log('submitted work');
+
+      await stagingBuffer.mapAsync(GPUMapMode.MAP_READ);
+
+      console.log('mapAsyncComplete');
+
+      const mappedRange = stagingBuffer.getMappedRange();
+      console.log('mappedRange', Array.from(new Uint32Array(mappedRange)));
 
       console.log('buffer', storageBuffer);
       console.log('queue', device.queue);

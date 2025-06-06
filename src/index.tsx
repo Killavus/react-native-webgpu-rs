@@ -31,4 +31,9 @@ export const GPUShaderStage = {
   COMPUTE: 0x04,
 };
 
+export const GPUMapMode = {
+  MAP_READ: 0x1,
+  MAP_WRITE: 0x2,
+};
+
 export { Instance };

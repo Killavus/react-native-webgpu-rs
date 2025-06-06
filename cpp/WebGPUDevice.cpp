@@ -390,7 +390,7 @@ WebGPUDevice::createBuffer(const BufferDescriptor &descriptor) {
 
   WGPUBuffer buffer = wgpuDeviceCreateBuffer(device_, &wgpuDescriptor);
 
-  return std::make_shared<WebGPUBuffer>(buffer);
+  return std::make_shared<WebGPUBuffer>(buffer, device_);
 }
 
 std::shared_ptr<HybridNitroWGPUSamplerSpec>
