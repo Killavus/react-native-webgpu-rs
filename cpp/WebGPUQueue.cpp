@@ -38,10 +38,10 @@ void WebGPUQueue::writeBuffer(
 }
 
 void WebGPUQueue::writeTexture(
-    const WriteTextureDestination &source,
+    const TextureCopyDescriptor &source,
     const std::shared_ptr<ArrayBuffer> &data,
-    const WriteTextureDataLayout &dataLayout,
-    const std::variant<WriteTextureExtentObject, std::vector<double>> &size) {
+    const TextureCopyDataLayout &dataLayout,
+    const std::variant<std::vector<double>, TextureCopyExtentObject> &size) {
   WGPUTexelCopyTextureInfo wgpuDestination{0};
   WGPUTexelCopyBufferLayout wgpuDataLayout{0};
   WGPUExtent3D wgpuExtent{0};
@@ -57,9 +57,8 @@ void WebGPUQueue::writeTexture(
   if (source.origin.has_value()) {
     auto sourceOrigin = source.origin.value();
 
-    if (std::holds_alternative<WriteTextureOriginObject>(sourceOrigin)) {
-      auto sourceOriginObject =
-          std::get<WriteTextureOriginObject>(sourceOrigin);
+    if (std::holds_alternative<TextureCopyOriginObject>(sourceOrigin)) {
+      auto sourceOriginObject = std::get<TextureCopyOriginObject>(sourceOrigin);
 
       wgpuDestination.origin = {.x = (uint32_t)sourceOriginObject.x,
                                 .y = (uint32_t)sourceOriginObject.y,
@@ -74,8 +73,8 @@ void WebGPUQueue::writeTexture(
     }
   }
 
-  if (std::holds_alternative<WriteTextureExtentObject>(size)) {
-    auto sizeObject = std::get<WriteTextureExtentObject>(size);
+  if (std::holds_alternative<TextureCopyExtentObject>(size)) {
+    auto sizeObject = std::get<TextureCopyExtentObject>(size);
 
     wgpuExtent.width = (uint32_t)sizeObject.width;
     wgpuExtent.height = (uint32_t)sizeObject.height.value_or(1);

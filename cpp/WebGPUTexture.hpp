@@ -18,10 +18,6 @@ public:
 
   std::shared_ptr<HybridNitroWGPUTextureViewSpec>
   createView(const TextureViewDescriptor &descriptor) override;
-  void writeTexture(const WriteTextureDestination &source,
-                    const std::shared_ptr<ArrayBuffer> &data,
-                    const WriteTextureDataLayout &dataLayout,
-                    double size) override;
   double getWidth() override;
   double getHeight() override;
   double getDepthOrArrayLayers() override;

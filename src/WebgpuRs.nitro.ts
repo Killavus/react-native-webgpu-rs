@@ -303,21 +303,21 @@ export interface NitroWGPUBuffer
   unmap(): void;
 }
 
-type WriteTextureOrigin = WriteTextureOriginObject | number[];
-type WriteTextureOriginObject = {
+type TextureCopyOrigin = TextureCopyOriginObject | number[];
+type TextureCopyOriginObject = {
   x: number;
   y: number;
   z: number;
 };
 
-type WriteTextureDestination = {
+type TextureCopyDescriptor = {
   aspect?: TextureAspect;
   mipLevel?: number;
-  origin?: WriteTextureOrigin;
+  origin?: TextureCopyOrigin;
   texture: NitroWGPUTexture;
 };
 
-type WriteTextureDataLayout = {
+type TextureCopyDataLayout = {
   offset?: number;
   bytesPerRow?: number;
   rowsPerImage?: number;
@@ -335,15 +335,15 @@ export interface NitroWGPUQueue
   ): void;
 
   writeTexture(
-    source: WriteTextureDestination,
+    source: TextureCopyDescriptor,
     data: ArrayBuffer,
-    dataLayout: WriteTextureDataLayout,
-    size: WriteTextureExtent
+    dataLayout: TextureCopyDataLayout,
+    size: TextureCopyExtent
   ): void;
 }
 
-type WriteTextureExtent = WriteTextureExtentObject | number[];
-type WriteTextureExtentObject = {
+type TextureCopyExtent = TextureCopyExtentObject | number[];
+type TextureCopyExtentObject = {
   width: number;
   height?: number;
   depthOrArrayLayers?: number;
@@ -351,6 +351,13 @@ type WriteTextureExtentObject = {
 
 type CommandBufferDescriptor = {
   label?: string;
+};
+
+type BufferCopyDescriptor = {
+  buffer: NitroWGPUBuffer;
+  offset?: number;
+  bytesPerRow?: number;
+  rowsPerImage?: number;
 };
 
 export interface NitroWGPUSampler
@@ -370,6 +377,22 @@ export interface NitroWGPUCommandEncoder
     destination: NitroWGPUBuffer,
     destinationOffset: number,
     size: number
+  ): void;
+  clearBuffer(buffer: NitroWGPUBuffer, offset?: number, size?: number): void;
+  copyBufferToTexture(
+    source: BufferCopyDescriptor,
+    destination: TextureCopyDescriptor,
+    copySize: TextureCopyExtent
+  ): void;
+  copyTextureToTexture(
+    source: TextureCopyDescriptor,
+    destination: TextureCopyDescriptor,
+    copySize: TextureCopyExtent
+  ): void;
+  copyTextureToBuffer(
+    source: TextureCopyDescriptor,
+    destination: BufferCopyDescriptor,
+    copySize: TextureCopyExtent
   ): void;
   finish(descriptor?: CommandBufferDescriptor): NitroWGPUCommandBuffer;
 }

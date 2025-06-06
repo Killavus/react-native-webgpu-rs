@@ -30,6 +30,28 @@ public:
       const std::shared_ptr<HybridNitroWGPUBufferSpec> &destination,
       double destinationOffset, double size) override;
 
+  void clearBuffer(const std::shared_ptr<HybridNitroWGPUBufferSpec> &buffer,
+                   std::optional<double> offset,
+                   std::optional<double> size) override;
+
+  void copyBufferToTexture(
+      const BufferCopyDescriptor &source,
+      const TextureCopyDescriptor &destination,
+      const std::variant<std::vector<double>, TextureCopyExtentObject>
+          &copySize) override;
+
+  void copyTextureToBuffer(
+      const TextureCopyDescriptor &source,
+      const BufferCopyDescriptor &destination,
+      const std::variant<std::vector<double>, TextureCopyExtentObject>
+          &copySize) override;
+
+  void copyTextureToTexture(
+      const TextureCopyDescriptor &source,
+      const TextureCopyDescriptor &destination,
+      const std::variant<std::vector<double>, TextureCopyExtentObject>
+          &copySize) override;
+
 private:
   WGPUCommandEncoder commandEncoder_;
 };
