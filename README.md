@@ -6,9 +6,27 @@ React Native WebGPU implementation (with gfx-rs/wgpu)
 
 Right now due to lack of XCFramework setup library works only on iOS simulator. This should be solved soon since there is a clear path to make it work.
 
-## Building 
+## Building
 
 Download latest `wgpu-native` release from [`wgpu-native` releases page](https://github.com/gfx-rs/wgpu-native/releases). Choose `wgpu-ios-aarch64-simulator-release` build and unzip it into `wgpu-native/` directory of this repository.
+
+Install dependencies:
+
+```
+yarn install
+```
+
+Run Nitro codegen:
+
+```
+yarn nitrogen && cd example/ios && pod install && cd ../..
+```
+
+And run example app on simulator:
+
+```
+yarn example ios
+```
 
 
 ## Installation
