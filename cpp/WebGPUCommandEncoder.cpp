@@ -4,6 +4,7 @@
 #include "WebGPUCommandBuffer.hpp"
 #include "WebGPUComputePassEncoder.hpp"
 #include "WebGPUTexture.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUCommandEncoder::WebGPUCommandEncoder()
@@ -312,5 +313,14 @@ void WebGPUCommandEncoder::copyTextureToBuffer(
         sizeArray.size() > 2 ? (uint32_t)sizeArray[2] : 1;
   }
 }
+
+    void WebGPUCommandEncoder::setLabel(const std::string &label) {
+        WGPUStringView view { label.c_str(), WGPU_STRLEN };
+        wgpuCommandEncoderSetLabel(commandEncoder_, view);
+    }
+
+    std::string WebGPUCommandEncoder::getLabel() {
+        return NOT_IMPLEMENTED_LABEL_TEXT;
+    }
 
 } // namespace margelo::nitro

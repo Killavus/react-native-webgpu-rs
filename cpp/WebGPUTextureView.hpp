@@ -16,6 +16,9 @@ public:
   ~WebGPUTextureView() override;
 
   const WGPUTextureView &resource() const;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
+
 
 private:
   WGPUTextureView textureView_;

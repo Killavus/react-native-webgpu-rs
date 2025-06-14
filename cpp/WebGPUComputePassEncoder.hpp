@@ -31,6 +31,8 @@ public:
   void dispatchWorkgroups(double workgroupCountX, double workgroupCountY,
                           double workgroupCountZ) override;
   void end() override;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 
 private:
   WGPUComputePassEncoder encoder_;

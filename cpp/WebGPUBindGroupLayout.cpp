@@ -1,4 +1,5 @@
 #include "WebGPUBindGroupLayout.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUBindGroupLayout::WebGPUBindGroupLayout()
@@ -13,5 +14,16 @@ WebGPUBindGroupLayout::~WebGPUBindGroupLayout() {
 
 const WGPUBindGroupLayout &WebGPUBindGroupLayout::resource() const {
   return layout_;
+}
+
+std::string WebGPUBindGroupLayout::getLabel()
+{
+    return NOT_IMPLEMENTED_LABEL_TEXT;
+}
+
+void WebGPUBindGroupLayout::setLabel(const std::string &label)
+{
+    WGPUStringView view{label.c_str(), WGPU_STRLEN};
+    wgpuBindGroupLayoutSetLabel(layout_, view);
 }
 } // namespace margelo::nitro

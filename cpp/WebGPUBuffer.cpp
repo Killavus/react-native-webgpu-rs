@@ -1,64 +1,73 @@
 #include "WebGPUBuffer.hpp"
+#include "WGPUTypeConversions.hpp"
+#include "WGPUInternalConstants.hpp"
 
-namespace margelo::nitro {
-WebGPUBuffer::WebGPUBuffer()
-    : HybridObject(TAG), buffer_(nullptr), device_(nullptr) {}
-WebGPUBuffer::WebGPUBuffer(WGPUBuffer buffer, WGPUDevice device)
-    : HybridObject(TAG), buffer_(buffer), device_(device) {}
-WebGPUBuffer::~WebGPUBuffer() {
-  if (buffer_) {
-    wgpuBufferRelease(buffer_);
+namespace margelo::nitro
+{
+  WebGPUBuffer::WebGPUBuffer()
+      : HybridObject(TAG), buffer_(nullptr), device_(nullptr) {}
+  WebGPUBuffer::WebGPUBuffer(WGPUBuffer buffer, WGPUDevice device)
+      : HybridObject(TAG), buffer_(buffer), device_(device) {}
+  WebGPUBuffer::~WebGPUBuffer()
+  {
+    if (buffer_)
+    {
+      wgpuBufferRelease(buffer_);
+    }
   }
-}
 
-const WGPUBuffer &WebGPUBuffer::resource() const { return buffer_; }
+  const WGPUBuffer &WebGPUBuffer::resource() const { return buffer_; }
 
-static void handleMapAsync(WGPUMapAsyncStatus status, WGPUStringView message,
-                           void *userdata1, void *userdata2) {
-  printf("handleMapAsync\n");
-  auto promise = static_cast<std::shared_ptr<Promise<void>> *>(userdata1);
+  static void handleMapAsync(WGPUMapAsyncStatus status, WGPUStringView message,
+                             void *userdata1, void *userdata2)
+  {
+    printf("handleMapAsync\n");
+    auto promise = static_cast<std::shared_ptr<Promise<void>> *>(userdata1);
 
-  switch (status) {
-  case WGPUMapAsyncStatus_Aborted:
-    printf("handleMapAsync ABORTED\n");
-    promise->get()->reject(std::make_exception_ptr(message));
-    delete promise;
-    return;
-  case WGPUMapAsyncStatus_InstanceDropped:
-    printf("handleMapAsync INSTANCE DROPPED\n");
-    promise->get()->reject(std::make_exception_ptr(message));
-    delete promise;
-    return;
-  case WGPUMapAsyncStatus_Success:
-    printf("handleMapAsync SUCCESS\n");
-    promise->get()->resolve();
-    delete promise;
-    return;
-  case WGPUMapAsyncStatus_Error:
-    printf("handleMapAsync ERROR\n");
-    promise->get()->reject(std::make_exception_ptr(message));
-    delete promise;
-    return;
-  case WGPUMapAsyncStatus_Unknown:
-    printf("Unknown WGPUMapAsyncStatus\n");
-    return;
-  default:
-    return;
+    switch (status)
+    {
+    case WGPUMapAsyncStatus_Aborted:
+      printf("handleMapAsync ABORTED\n");
+      promise->get()->reject(std::make_exception_ptr(message));
+      delete promise;
+      return;
+    case WGPUMapAsyncStatus_InstanceDropped:
+      printf("handleMapAsync INSTANCE DROPPED\n");
+      promise->get()->reject(std::make_exception_ptr(message));
+      delete promise;
+      return;
+    case WGPUMapAsyncStatus_Success:
+      printf("handleMapAsync SUCCESS\n");
+      promise->get()->resolve();
+      delete promise;
+      return;
+    case WGPUMapAsyncStatus_Error:
+      printf("handleMapAsync ERROR\n");
+      promise->get()->reject(std::make_exception_ptr(message));
+      delete promise;
+      return;
+    case WGPUMapAsyncStatus_Unknown:
+      printf("Unknown WGPUMapAsyncStatus\n");
+      return;
+    default:
+      return;
+    }
   }
-}
 
-std::shared_ptr<Promise<void>>
-WebGPUBuffer::mapAsync(double mode, std::optional<double> offset,
-                       std::optional<double> size) {
-  printf("WebGPUBuffer::mapAsync\n");
-  auto wgpuOffset = (size_t)offset.value_or(0);
-  auto wgpuSize = wgpuBufferGetSize(buffer_) - (size_t)offset.value_or(0);
+  std::shared_ptr<Promise<void>>
+  WebGPUBuffer::mapAsync(double mode, std::optional<double> offset,
+                         std::optional<double> size)
+  {
+    printf("WebGPUBuffer::mapAsync\n");
+    auto wgpuOffset = (size_t)offset.value_or(0);
+    auto wgpuSize = wgpuBufferGetSize(buffer_) - (size_t)offset.value_or(0);
 
-  auto promise = Promise<void>::create();
+    auto promise = Promise<void>::create();
 
-  auto promiseCb = new std::shared_ptr<Promise<void>>(promise);
+    auto promiseCb = new std::shared_ptr<Promise<void>>(promise);
 
-  ThreadPool::shared().run([=, this] {
+    ThreadPool::shared().run([=, this]
+                             {
     WGPUBufferMapCallbackInfo callbackInfo{0};
     callbackInfo.nextInChain = nullptr;
     callbackInfo.userdata1 = promiseCb;
@@ -67,26 +76,52 @@ WebGPUBuffer::mapAsync(double mode, std::optional<double> offset,
 
     wgpuBufferMapAsync(buffer_, (uint64_t)mode, wgpuOffset, wgpuSize,
                        callbackInfo);
-    wgpuDevicePoll(device_, 1, nullptr);
-  });
+    wgpuDevicePoll(device_, 1, nullptr); });
 
-  return promise;
-}
+    return promise;
+  }
 
-std::shared_ptr<ArrayBuffer>
-WebGPUBuffer::getMappedRange(std::optional<double> offset,
-                             std::optional<double> size) {
-  auto wgpuOffset = (size_t)offset.value_or(0);
-  auto wgpuSize = wgpuBufferGetSize(buffer_) - (size_t)offset.value_or(0);
+  BufferMapState WebGPUBuffer::getMapState()
+  {
+    return toNitroBufferMapState(wgpuBufferGetMapState(buffer_));
+  }
 
-  uint8_t *mappedData =
-      (uint8_t *)wgpuBufferGetMappedRange(buffer_, wgpuOffset, wgpuSize);
+  double WebGPUBuffer::getSize()
+  {
+    return wgpuBufferGetSize(buffer_);
+  }
 
-  auto mappedArrayBuffer = ArrayBuffer::wrap(mappedData, wgpuSize, [=]() {});
+  double WebGPUBuffer::getUsage()
+  {
+    return wgpuBufferGetUsage(buffer_);
+  }
 
-  return mappedArrayBuffer;
-}
+  std::string WebGPUBuffer::getLabel()
+  {
+    return NOT_IMPLEMENTED_LABEL_TEXT;
+  }
 
-void WebGPUBuffer::unmap() { wgpuBufferUnmap(buffer_); };
+  void WebGPUBuffer::setLabel(const std::string &label)
+  {
+    WGPUStringView view{label.c_str(), WGPU_STRLEN};
+    wgpuBufferSetLabel(buffer_, view);
+  }
+
+  std::shared_ptr<ArrayBuffer>
+  WebGPUBuffer::getMappedRange(std::optional<double> offset,
+                               std::optional<double> size)
+  {
+    auto wgpuOffset = (size_t)offset.value_or(0);
+    auto wgpuSize = wgpuBufferGetSize(buffer_) - (size_t)offset.value_or(0);
+
+    uint8_t *mappedData =
+        (uint8_t *)wgpuBufferGetMappedRange(buffer_, wgpuOffset, wgpuSize);
+
+    auto mappedArrayBuffer = ArrayBuffer::wrap(mappedData, wgpuSize, [=]() {});
+
+    return mappedArrayBuffer;
+  }
+
+  void WebGPUBuffer::unmap() { wgpuBufferUnmap(buffer_); };
 
 } // namespace margelo::nitro

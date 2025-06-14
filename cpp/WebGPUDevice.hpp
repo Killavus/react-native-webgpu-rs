@@ -61,6 +61,9 @@ public:
   RequiredLimits getLimits() override;
   DeviceInfo getAdapterInfo() override;
   bool getLost() override;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
+
 
 private:
   WGPUDevice device_;

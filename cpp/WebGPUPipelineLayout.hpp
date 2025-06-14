@@ -17,6 +17,8 @@ public:
   ~WebGPUPipelineLayout() override;
 
   const WGPUPipelineLayout &resource() const;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 
 private:
   WGPUPipelineLayout layout_;

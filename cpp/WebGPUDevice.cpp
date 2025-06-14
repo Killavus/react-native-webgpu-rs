@@ -10,6 +10,7 @@
 #include "WebGPUShaderModule.hpp"
 #include "WebGPUTexture.hpp"
 #include "WebGPUTextureView.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 
@@ -512,5 +513,14 @@ RequiredLimits WebGPUDevice::getLimits() {
 DeviceInfo WebGPUDevice::getAdapterInfo() { return info_; };
 
 bool WebGPUDevice::getLost() { return false; };
+
+    void WebGPUDevice::setLabel(const std::string &label) {
+        WGPUStringView view { label.c_str(), WGPU_STRLEN };
+        wgpuDeviceSetLabel(device_, view);
+    }
+
+    std::string WebGPUDevice::getLabel() {
+        return NOT_IMPLEMENTED_LABEL_TEXT;
+    }
 
 } // namespace margelo::nitro

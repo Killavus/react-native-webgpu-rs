@@ -781,4 +781,17 @@ DeviceFeature toNitroDeviceFeature(const WGPUFeatureName &featureName) {
   }
 }
 
+BufferMapState toNitroBufferMapState(const WGPUBufferMapState &state) {
+    switch (state) {
+        case WGPUBufferMapState_Mapped:
+            return BufferMapState::MAPPED;
+        case WGPUBufferMapState_Pending:
+            return BufferMapState::PENDING;
+        case WGPUBufferMapState_Unmapped:
+            return BufferMapState::UNMAPPED;
+        default:
+            return BufferMapState::UNMAPPED;
+    }
+}
+
 } // namespace margelo::nitro

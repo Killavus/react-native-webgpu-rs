@@ -17,6 +17,9 @@ public:
 
   const WGPUSampler &resource() const;
 
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
+
 private:
   WGPUSampler sampler_;
 };

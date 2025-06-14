@@ -1,4 +1,5 @@
 #include "WebGPUShaderModule.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUShaderModule::WebGPUShaderModule()
@@ -13,5 +14,14 @@ WebGPUShaderModule::~WebGPUShaderModule() {
 
 const WGPUShaderModule &WebGPUShaderModule::resource() const {
   return shaderModule_;
+}
+
+void WebGPUShaderModule::setLabel(const std::string &label) {
+    WGPUStringView view { label.c_str(), WGPU_STRLEN };
+    wgpuShaderModuleSetLabel(shaderModule_, view);
+}
+
+std::string WebGPUShaderModule::getLabel() {
+    return NOT_IMPLEMENTED_LABEL_TEXT;
 }
 } // namespace margelo::nitro

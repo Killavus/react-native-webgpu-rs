@@ -17,6 +17,8 @@ public:
 
   const WGPUShaderModule &resource() const;
 
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 private:
   WGPUShaderModule shaderModule_;
 };

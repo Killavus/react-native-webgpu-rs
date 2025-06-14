@@ -15,6 +15,7 @@ extern "C" {
 #include "TextureFormat.hpp"
 #include "TextureLayoutObjectSampleType.hpp"
 #include "TextureLayoutObjectViewDimension.hpp"
+#include "BufferMapState.hpp"
 
 namespace margelo::nitro {
 WGPUStorageTextureAccess
@@ -38,4 +39,5 @@ TextureDimension toNitroTextureDimension(const WGPUTextureDimension &dimension);
 TextureFormat toNitroTextureFormat(const WGPUTextureFormat &dimension);
 WGPUFeatureName toWGPUFeatureName(const DeviceFeature &feature);
 DeviceFeature toNitroDeviceFeature(const WGPUFeatureName &feature);
+BufferMapState toNitroBufferMapState(const WGPUBufferMapState &mode);
 } // namespace margelo::nitro

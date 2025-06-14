@@ -3,6 +3,7 @@
 #include "WebGPUBuffer.hpp"
 #include "WebGPUCommandBuffer.hpp"
 #include "WebGPUTexture.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUQueue::WebGPUQueue() : HybridObject(TAG), queue_(nullptr) {}
@@ -104,5 +105,15 @@ void WebGPUQueue::writeTexture(
   wgpuQueueWriteTexture(queue_, &wgpuDestination, (void *)data->data(),
                         data->size(), &wgpuDataLayout, &wgpuExtent);
 }
+
+    void WebGPUQueue::setLabel(const std::string &label) {
+        WGPUStringView view { label.c_str(), WGPU_STRLEN };
+        wgpuQueueSetLabel(queue_, view);
+    }
+
+    std::string WebGPUQueue::getLabel() {
+        return NOT_IMPLEMENTED_LABEL_TEXT;
+    }
+
 
 } // namespace margelo::nitro

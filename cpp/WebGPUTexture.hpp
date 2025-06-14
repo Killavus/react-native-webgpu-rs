@@ -28,6 +28,8 @@ public:
   TextureDimension getDimension() override;
   TextureFormat getFormat() override;
   double getUsage() override;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 
   const WGPUTexture &resource() const;
 
