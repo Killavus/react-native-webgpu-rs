@@ -1,5 +1,8 @@
 #pragma once
+extern "C" {
 #include <webgpu/wgpu.h>
+}
+
 
 #include "BufferLayoutObjectBindingType.hpp"
 #include "DeviceFeature.hpp"
