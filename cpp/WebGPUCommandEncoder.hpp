@@ -5,7 +5,10 @@
 #include "HybridNitroWGPUCommandEncoderSpec.hpp"
 #include "HybridNitroWGPUComputePassEncoderSpec.hpp"
 #include <memory>
+
+extern "C" {
 #include <webgpu/wgpu.h>
+}
 
 namespace margelo::nitro {
 using webgpurs::HybridNitroWGPUBufferSpec;

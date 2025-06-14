@@ -1,4 +1,4 @@
-package com.webgpurs
+package com.margelo.nitro.webgpurs
 
 import com.facebook.react.TurboReactPackage
 import com.facebook.react.bridge.NativeModule
