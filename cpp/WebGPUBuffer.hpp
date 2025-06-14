@@ -22,6 +22,15 @@ public:
   std::shared_ptr<ArrayBuffer>
   getMappedRange(std::optional<double> offset,
                  std::optional<double> size) override;
+
+  BufferMapState getMapState() override;
+
+  double getSize() override;
+  double getUsage() override;
+
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
+
   void unmap() override;
 
 private:

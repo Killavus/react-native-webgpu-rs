@@ -17,7 +17,8 @@ public:
   ~WebGPUBindGroup() override;
 
   const WGPUBindGroup &resource() const;
-
+void setLabel(const std::string &label) override;
+std::string getLabel() override;
 private:
   WGPUBindGroup group_;
 };

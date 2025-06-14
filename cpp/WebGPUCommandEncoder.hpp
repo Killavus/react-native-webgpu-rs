@@ -54,7 +54,8 @@ public:
       const TextureCopyDescriptor &destination,
       const std::variant<std::vector<double>, TextureCopyExtentObject>
           &copySize) override;
-
+    void setLabel(const std::string &label) override;
+    std::string getLabel() override;
 private:
   WGPUCommandEncoder commandEncoder_;
 };

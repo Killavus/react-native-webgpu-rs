@@ -1,6 +1,7 @@
 #include "WebGPUTexture.hpp"
 #include "WGPUTypeConversions.hpp"
 #include "WebGPUTextureView.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUTexture::WebGPUTexture() : HybridObject(TAG), texture_(nullptr) {}
@@ -108,6 +109,14 @@ TextureFormat WebGPUTexture::getFormat() {
 double WebGPUTexture::getUsage() {
   return (double)wgpuTextureGetUsage(texture_);
 };
+std::string WebGPUTexture::getLabel() {
+    return NOT_IMPLEMENTED_LABEL_TEXT;
+}
+
+void WebGPUTexture::setLabel(const std::string &label) {
+    WGPUStringView view { label.c_str(), WGPU_STRLEN };
+    wgpuTextureSetLabel(texture_, view);
+}
 
 const WGPUTexture &WebGPUTexture::resource() const { return texture_; }
 

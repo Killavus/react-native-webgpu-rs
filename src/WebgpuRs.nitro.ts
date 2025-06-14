@@ -296,8 +296,15 @@ type ComputePassDescriptor = {
   // timestampWrites?: ComputePassTimestampWrite[];
 };
 
+type BufferMapState = 'unmapped' | 'pending' | 'mapped';
+
 export interface NitroWGPUBuffer
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  readonly mapState: BufferMapState;
+  readonly size: number;
+  readonly usage: number;
+  label: string;
+
   mapAsync(mode: number, offset?: number, size?: number): Promise<void>;
   getMappedRange(offset?: number, size?: number): ArrayBuffer;
   unmap(): void;
@@ -340,6 +347,8 @@ export interface NitroWGPUQueue
     dataLayout: TextureCopyDataLayout,
     size: TextureCopyExtent
   ): void;
+
+  label: string;
 }
 
 type TextureCopyExtent = TextureCopyExtentObject | number[];
@@ -361,13 +370,21 @@ type BufferCopyDescriptor = {
 };
 
 export interface NitroWGPUSampler
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
+
 export interface NitroWGPUShaderModule
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 export interface NitroWGPUCommandBuffer
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 export interface NitroWGPUCommandEncoder
   extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
   beginComputePass(
     descriptor: ComputePassDescriptor
   ): NitroWGPUComputePassEncoder;
@@ -423,22 +440,33 @@ export interface NitroWGPUTexture
   readonly dimension: TextureDimension;
   readonly format: TextureFormat;
   readonly usage: number;
+  label: string;
 }
 
 export interface NitroWGPUBindGroupLayout
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 
 export interface NitroWGPUBindGroup
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 
 export interface NitroWGPUTextureView
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 
 export interface NitroWGPUPipelineLayout
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 
 export interface NitroWGPUComputePipeline
-  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {}
+  extends HybridObject<{ ios: 'c++'; android: 'c++' }> {
+  label: string;
+}
 
 type EncodedBindGroup = NitroWGPUBindGroup | null;
 
@@ -455,6 +483,7 @@ export interface NitroWGPUComputePassEncoder
   // popDebugGroup(): void;
   // pushDebugGroup(groupLabel: string): void;
   // insertDebugMarker(markerLabel: string): void;
+  label: string;
   end(): void;
 }
 
@@ -572,6 +601,7 @@ export interface NitroWGPUDevice
   readonly limits: RequiredLimits;
   readonly adapterInfo: DeviceInfo;
   readonly lost: boolean;
+  label: string;
 
   createBuffer(descriptor: BufferDescriptor): NitroWGPUBuffer;
   createSampler(descriptor?: SamplerDescriptor): NitroWGPUSampler;

@@ -1,6 +1,7 @@
 #include "WebGPUComputePassEncoder.hpp"
 #include "WebGPUBindGroup.hpp"
 #include "WebGPUComputePipeline.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUComputePassEncoder::WebGPUComputePassEncoder()
@@ -50,5 +51,12 @@ void WebGPUComputePassEncoder::dispatchWorkgroups(double workgroupCountX,
 };
 
 void WebGPUComputePassEncoder::end() { wgpuComputePassEncoderEnd(encoder_); };
+    void WebGPUComputePassEncoder::setLabel(const std::string &label) {
+        WGPUStringView view { label.c_str(), WGPU_STRLEN };
+        wgpuComputePassEncoderSetLabel(encoder_, view);
+    }
 
+    std::string WebGPUComputePassEncoder::getLabel() {
+        return NOT_IMPLEMENTED_LABEL_TEXT;
+    }
 } // namespace margelo::nitro

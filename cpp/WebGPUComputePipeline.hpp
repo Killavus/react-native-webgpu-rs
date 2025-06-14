@@ -16,6 +16,8 @@ public:
   ~WebGPUComputePipeline() override;
 
   const WGPUComputePipeline &resource() const;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 
 private:
   WGPUComputePipeline pipeline_;

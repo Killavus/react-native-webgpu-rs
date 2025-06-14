@@ -1,4 +1,5 @@
 #include "WebGPUTextureView.hpp"
+#include "WGPUInternalConstants.hpp"
 
 namespace margelo::nitro {
 WebGPUTextureView::WebGPUTextureView()
@@ -14,5 +15,15 @@ WebGPUTextureView::~WebGPUTextureView() {
 const WGPUTextureView &WebGPUTextureView::resource() const {
   return textureView_;
 }
+
+std::string WebGPUTextureView::getLabel() {
+    return NOT_IMPLEMENTED_LABEL_TEXT;
+}
+
+void WebGPUTextureView::setLabel(const std::string &label) {
+    WGPUStringView view { label.c_str(), WGPU_STRLEN };
+    wgpuTextureViewSetLabel(textureView_, view);
+}
+
 
 } // namespace margelo::nitro

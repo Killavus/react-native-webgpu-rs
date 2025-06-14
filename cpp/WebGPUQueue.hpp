@@ -33,6 +33,8 @@ public:
                     const TextureCopyDataLayout &dataLayout,
                     const std::variant<std::vector<double>,
                                        TextureCopyExtentObject> &size) override;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 
 private:
   WGPUQueue queue_;

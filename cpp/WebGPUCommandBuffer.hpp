@@ -17,6 +17,8 @@ public:
   ~WebGPUCommandBuffer() override;
 
   const WGPUCommandBuffer &resource() const;
+  void setLabel(const std::string &label) override;
+  std::string getLabel() override;
 
 private:
   WGPUCommandBuffer cmdBuffer_;
